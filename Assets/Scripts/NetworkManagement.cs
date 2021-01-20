@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
+using UnityEngine.AI;
 
 /*
 	Documentation: https://mirror-networking.com/docs/Components/NetworkManager.html
@@ -9,6 +10,17 @@ using Mirror;
 
 public class NetworkManagement : NetworkManager
 {
+    public struct PlayerMessage : NetworkMessage
+    {
+        public string nickname;
+        public int currentOutfit;
+        public Vector3 pos;
+    }
+
+    public FirebaseManager DBManager;
+
+    public NetworkStartPosition defaultStart;
+
     #region Unity Callbacks
 
 public override void OnValidate()
@@ -23,6 +35,7 @@ public override void OnValidate()
 public override void Awake()
 {
     base.Awake();
+        DBManager = FindObjectOfType<FirebaseManager>();
 }
 
 /// <summary>
@@ -176,8 +189,16 @@ public override void OnServerError(NetworkConnection conn, int errorCode) { }
 /// <param name="conn">Connection to the server.</param>
 public override void OnClientConnect(NetworkConnection conn)
 {
-    base.OnClientConnect(conn);
-}
+        base.OnClientConnect(conn);
+        PlayerMessage msg = new PlayerMessage();
+        PlayerInfo p = DBManager.GetPlayerInfo();
+        msg.nickname = p.nickname;
+        msg.currentOutfit = p.currentOutfit;
+        msg.pos = new Vector3(p.x, p.y, p.z);
+        Debug.Log("Sending PlayerMessage: " + msg.nickname + ", pos: " + msg.pos.ToString());
+        conn.Send(msg);
+        
+    }
 
 /// <summary>
 /// Called on clients when disconnected from a server.
@@ -221,12 +242,18 @@ public override void OnStartHost() { }
 /// This is invoked when a server is started - including when a host is started.
 /// <para>StartServer has multiple signatures, but they all cause this hook to be called.</para>
 /// </summary>
-public override void OnStartServer() { }
+public override void OnStartServer() {
+        base.OnStartServer();
+        NetworkServer.RegisterHandler<PlayerMessage>(OnPlayerMessage);
+        SceneManager.LoadSceneAsync("MainGame");
+    }
 
 /// <summary>
 /// This is invoked when the client is started.
 /// </summary>
-public override void OnStartClient() { }
+public override void OnStartClient() {
+        SceneManager.LoadSceneAsync("MainGame");
+    }
 
 /// <summary>
 /// This is called when a host is stopped.
@@ -244,4 +271,31 @@ public override void OnStopServer() { }
 public override void OnStopClient() { }
 
     #endregion
+
+
+
+    void OnPlayerMessage(NetworkConnection conn, PlayerMessage message)
+    {
+        
+        GameObject obj = GameObject.Instantiate(playerPrefab, message.pos, Quaternion.identity) ;
+        obj.gameObject.name = message.nickname;
+        Player p = obj.GetComponent<Player>();
+
+        p.nickname = message.nickname;
+        p.currentOutfit = message.currentOutfit;
+
+        NavMeshAgent agent = obj.GetComponent<NavMeshAgent>();
+        agent.enabled = false;
+        agent.Warp(message.pos);
+        agent.enabled = true;
+        NetworkServer.AddPlayerForConnection(conn, obj);
+        Debug.Log("Player connected: " + p.nickname);
+    }
+
+
+    public void ConnectClient(PlayerInfo p)
+    {
+
+    }
+
 }

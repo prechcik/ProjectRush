@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using Mirror;
 using UnityEngine.Networking;
 using System.Collections;
+using UnityEngine.UI;
 
 /*
     Authenticators: https://mirror-networking.com/docs/Components/Authenticators/
@@ -12,6 +13,11 @@ using System.Collections;
 
 public class Authenticator : NetworkAuthenticator
 {
+
+    public InputField userField;
+    public InputField passwordField;
+    private PlayerInfo playerInfo;
+
     #region Messages
 
 public struct AuthRequestMessage : NetworkMessage {
@@ -20,7 +26,6 @@ public struct AuthRequestMessage : NetworkMessage {
     }
 
 public struct AuthResponseMessage : NetworkMessage {
-        public string response;
         public PlayerInfo player;
     }
 
@@ -55,11 +60,16 @@ public void OnAuthRequestMessage(NetworkConnection conn, AuthRequestMessage msg)
 
 
     StartCoroutine(SendPostCoroutine(msg.username, msg.password));
-    
-    conn.Send(authResponseMessage);
 
-    // Accept the successful authentication
-    ServerAccept(conn);
+    authResponseMessage.player = playerInfo;
+    conn.Send(authResponseMessage);
+        // Accept the successful authentication
+        if (playerInfo != null)
+        {
+            ServerAccept(conn);
+
+
+        }
 }
 
 #endregion
@@ -83,6 +93,8 @@ public override void OnStartClient()
 public override void OnClientAuthenticate(NetworkConnection conn)
 {
     AuthRequestMessage authRequestMessage = new AuthRequestMessage();
+        authRequestMessage.username = userField.text;
+        authRequestMessage.password = Md5.Md5Sum(passwordField.text);
 
     NetworkClient.Send(authRequestMessage);
 }
@@ -94,8 +106,14 @@ public override void OnClientAuthenticate(NetworkConnection conn)
 /// <param name="msg">The message payload</param>
 public void OnAuthResponseMessage(NetworkConnection conn, AuthResponseMessage msg)
 {
-    // Authentication has been accepted
-    ClientAccept(conn);
+        // Authentication has been accepted
+        if (msg.player != null)
+        {
+            conn.authenticationData = msg.player;
+            ClientAccept(conn);
+            SceneManager.LoadScene("MainGame");
+            
+        }
 }
 
     #endregion
@@ -107,18 +125,21 @@ public void OnAuthResponseMessage(NetworkConnection conn, AuthResponseMessage ms
         f.AddField("username", u);
         f.AddField("password", p);
         UnityWebRequest www = UnityWebRequest.Post(url, f);
-        Debug.Log("Sending authentication request");
+        //Debug.Log("Sending authentication request");
         yield return www.SendWebRequest();
         if (www.result == UnityWebRequest.Result.ConnectionError)
         {
             Debug.Log(www.error);
         } else
         {
-            Debug.Log("Response: '" + www.downloadHandler.text + "'");
-            PlayerInfo pInfo = JsonUtility.FromJson<PlayerInfo>(www.downloadHandler.text);
-            if (pInfo != null)
+            //Debug.Log("Response: '" + www.downloadHandler.text + "'");
+            playerInfo = JsonUtility.FromJson<PlayerInfo>(www.downloadHandler.text);
+            if (playerInfo != null)
             {
-                Debug.Log("Retrieved user data for account " + pInfo.username);
+                //Debug.Log("Retrieved user data for account " + playerInfo.username);
+            } else
+            {
+                Debug.Log("PlayerInfo not loaded!");
             }
         }
 

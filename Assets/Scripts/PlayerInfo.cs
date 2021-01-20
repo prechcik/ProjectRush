@@ -11,9 +11,9 @@ public class PlayerInfo
     public string nickname;
     public int currentOutfit;
     public string outfits;
-    public int x, y, z;
+    public float x, y, z;
 
-    public PlayerInfo(int id, string username, string nickname, int currentOutfit, string outfits, int x, int y, int z)
+    public PlayerInfo(int id, string username, string nickname, int currentOutfit, string outfits, float x, float y, float z)
     {
         this.id = id;
         this.username = username;

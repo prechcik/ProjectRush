@@ -9,27 +9,22 @@ public class PlayerMovement : NetworkBehaviour
     private NavMeshAgent agent;
 
     // Start is called before the first frame update
-    [Client]
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
     }
 
     // Update is called once per frame
-    [Client]
     void Update()
     {
-        //if (!hasAuthority) { return; }
-        if (Input.touchCount > 0)
+        if (!hasAuthority) { return; }
+        if (Input.GetMouseButtonDown(0))
         {
-            Touch t = Input.GetTouch(0);
-            if (t.phase == TouchPhase.Ended)
+            
+            RaycastHit hit;
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity))
             {
-                RaycastHit hit;
-                if (Physics.Raycast(Camera.main.ScreenPointToRay(t.position), out hit, 100))
-                {
-                    agent.SetDestination(hit.point);
-                }
+                agent.SetDestination(hit.point);
             }
         }
     }
