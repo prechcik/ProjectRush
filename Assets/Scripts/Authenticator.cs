@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
+using UnityEngine.Networking;
+using System.Collections;
 
 /*
     Authenticators: https://mirror-networking.com/docs/Components/Authenticators/
@@ -12,9 +14,15 @@ public class Authenticator : NetworkAuthenticator
 {
     #region Messages
 
-public struct AuthRequestMessage : NetworkMessage { }
+public struct AuthRequestMessage : NetworkMessage {
+        public string username;
+        public string password;
+    }
 
-public struct AuthResponseMessage : NetworkMessage { }
+public struct AuthResponseMessage : NetworkMessage {
+        public string response;
+        public PlayerInfo player;
+    }
 
 #endregion
 
@@ -45,6 +53,9 @@ public void OnAuthRequestMessage(NetworkConnection conn, AuthRequestMessage msg)
 {
     AuthResponseMessage authResponseMessage = new AuthResponseMessage();
 
+
+    StartCoroutine(SendPostCoroutine(msg.username, msg.password));
+    
     conn.Send(authResponseMessage);
 
     // Accept the successful authentication
@@ -88,4 +99,32 @@ public void OnAuthResponseMessage(NetworkConnection conn, AuthResponseMessage ms
 }
 
     #endregion
+
+    IEnumerator SendPostCoroutine(string u, string p)
+    {
+        string url = "http://192.168.0.110/ProjectRush/api/logininfo.php";
+        WWWForm f = new WWWForm();
+        f.AddField("username", u);
+        f.AddField("password", p);
+        UnityWebRequest www = UnityWebRequest.Post(url, f);
+        Debug.Log("Sending authentication request");
+        yield return www.SendWebRequest();
+        if (www.result == UnityWebRequest.Result.ConnectionError)
+        {
+            Debug.Log(www.error);
+        } else
+        {
+            Debug.Log("Response: '" + www.downloadHandler.text + "'");
+            PlayerInfo pInfo = JsonUtility.FromJson<PlayerInfo>(www.downloadHandler.text);
+            if (pInfo != null)
+            {
+                Debug.Log("Retrieved user data for account " + pInfo.username);
+            }
+        }
+
+    }
+
 }
+
+
+
