@@ -220,7 +220,9 @@ public override void OnClientDisconnect(NetworkConnection conn)
 /// </summary>
 /// <param name="conn">Connection to a server.</param>
 /// <param name="errorCode">Error code.</param>
-public override void OnClientError(NetworkConnection conn, int errorCode) { }
+public override void OnClientError(NetworkConnection conn, int errorCode) {
+        Debug.Log("Error: " + errorCode);
+    }
 
 /// <summary>
 /// Called on clients when a servers tells the client it is no longer ready.
@@ -257,7 +259,7 @@ public override void OnStartServer() {
 /// This is invoked when the client is started.
 /// </summary>
 public override void OnStartClient() {
-        SceneManager.LoadSceneAsync("MainGame");
+        
     }
 
 /// <summary>

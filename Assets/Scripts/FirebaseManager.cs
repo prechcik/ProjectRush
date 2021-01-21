@@ -5,6 +5,7 @@ using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class FirebaseManager : MonoBehaviour
 {
@@ -127,6 +128,7 @@ public class FirebaseManager : MonoBehaviour
                     UIManager.ShowPackage();
                 } else // Just log in
                 {
+                    SceneManager.LoadSceneAsync("MainGame");
                     network.StartClient();
                 }
                 

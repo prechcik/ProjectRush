@@ -286,7 +286,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 80
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!114 &7283763919728583309
 MonoBehaviour:
@@ -303,6 +303,6 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   clientAuthority: 1
-  localPositionSensitivity: 0.01
-  localRotationSensitivity: 0.01
+  localPositionSensitivity: 0.0001
+  localRotationSensitivity: 0.0001
   localScaleSensitivity: 0.01
