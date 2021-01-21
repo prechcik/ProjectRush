@@ -4650,7 +4650,7 @@ MonoBehaviour:
   offlineScene: 
   onlineScene: 
   transport: {fileID: 1863811566}
-  networkAddress: 35.153.98.121
+  networkAddress: 100.25.155.127
   maxConnections: 100
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
@@ -5080,7 +5080,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_UiScaleMode: 0
   m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
+  m_ScaleFactor: 0.75
   m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
