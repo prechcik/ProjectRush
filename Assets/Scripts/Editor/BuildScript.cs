@@ -32,9 +32,9 @@ public class BuildScript
     {
         BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
         buildPlayerOptions.scenes = new[] { "Assets/Scenes/MainMenu.unity", "Assets/Scenes/MainGame.unity" };
-        buildPlayerOptions.locationPathName = "Builds/Linux/Server/Server.x86_64";
+        buildPlayerOptions.locationPathName = "Builds/Linux/Server/Server";
         buildPlayerOptions.target = BuildTarget.StandaloneLinux64;
-        buildPlayerOptions.options = BuildOptions.CompressWithLz4HC | BuildOptions.EnableHeadlessMode;
+        buildPlayerOptions.options = BuildOptions.EnableHeadlessMode;
 
         Console.WriteLine("Building Server (Linux)...");
         BuildPipeline.BuildPlayer(buildPlayerOptions);
