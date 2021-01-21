@@ -7,8 +7,13 @@ public class StartPackageScreen : MonoBehaviour
 {
 
     public GameObject Card1, Card2, Card3, Card4, Card5;
-    GameDB gameDB;
+    public Image Card1OImage, Card2OImage, Card3OImage, Card4OImage, Card5OImage;
+    public Image Card1Ring, Card2Ring, Card3Ring, Card4Ring, Card5Ring;
+    private GameDB gameDB;
     public float animationSpeed = 2f;
+    public GameObject CardPrefab;
+
+    public GameObject PackageScreen, ContentScreen, ContentBG;
 
     private void Start()
     {
@@ -19,42 +24,47 @@ public class StartPackageScreen : MonoBehaviour
     public void GetRandomPackages()
     {
         List<int> randomOutfits = gameDB.GetRandomOutfits(5);
-        Debug.Log("Package rewards: " + randomOutfits.ToString());
+        Debug.Log("Package rewards: " + randomOutfits[0] + "," + randomOutfits[1] + "," + randomOutfits[2] + "," + randomOutfits[3] + "," + randomOutfits[4]);
 
-        Outfit Card1Outfit = gameDB.GetOutfit(randomOutfits[0]);
-        Button card1Button = Card1.GetComponent<Button>();
-        Image card1Image = Card1.GetComponent<Image>();
-        card1Image.sprite = Card1Outfit.icon;
-
-        Outfit Card2Outfit = gameDB.GetOutfit(randomOutfits[1]);
-        Button card2Button = Card2.GetComponent<Button>();
-        Image card2Image = Card2.GetComponent<Image>();
-        card2Image.sprite = Card2Outfit.icon;
-
-        Outfit Card3Outfit = gameDB.GetOutfit(randomOutfits[2]);
-        Button card3Button = Card3.GetComponent<Button>();
-        Image card3Image = Card3.GetComponent<Image>();
-        card3Image.sprite = Card3Outfit.icon;
-
-        Outfit Card4Outfit = gameDB.GetOutfit(randomOutfits[3]);
-        Button card4Button = Card4.GetComponent<Button>();
-        Image card4Image = Card4.GetComponent<Image>();
-        card4Image.sprite = Card4Outfit.icon;
-
-        Outfit Card5Outfit = gameDB.GetOutfit(randomOutfits[4]);
-        Button card5Button = Card5.GetComponent<Button>();
-        Image card5Image = Card5.GetComponent<Image>();
-        card5Image.sprite = Card5Outfit.icon;
+        StartCoroutine(RevealCards(randomOutfits.ToArray()));
 
 
     }
 
 
-    IEnumerator RevealCards(int id1, int id2, int id3, int id4, int id5)
+    IEnumerator RevealCards(int[] ids)
     {
-        Image card1Image = Card1.GetComponent<Image>();
-        float fill = Mathf.Lerp(card1Image.fillAmount, 0f, Time.deltaTime * animationSpeed);
-        card1Image.fillAmount = fill;
+        PackageScreen.SetActive(false);
+        ContentBG.SetActive(true);
+        List<Outfit> outfitList = new List<Outfit>();
+        for(int i = 0; i < ids.Length; i++)
+        {
+            outfitList.Add(gameDB.GetOutfit(ids[i]));
+            GameObject CardObj = Instantiate(CardPrefab, ContentScreen.transform);
+            OutfitCard card = CardObj.GetComponent<OutfitCard>();
+            int outfitId = ids[i];
+            card.cardButton.onClick.AddListener(delegate { gameDB.DBManager.AddOutfit(outfitId); Debug.Log("Sending outfit id request [" + outfitId + "] for player " + gameDB.DBManager.GetPlayerInfo().nickname); });
+            card.cardOutfit.sprite = outfitList[i].icon;
+            card.cardRarity.sprite = gameDB.GetRaritySprite(outfitList[i].rarity);
+            card.cardAnimator.SetTrigger("Reveal");
+            yield return new WaitForSeconds(1f);
+        }
+        yield return null;
+
+        
+
+
     }
+
+
+    public void ShowPackageScreen()
+    {
+        UIManager.ShowPackage();
+        PackageScreen.SetActive(true);
+        ContentBG.SetActive(false);
+    }
+
+
+    
 
 }

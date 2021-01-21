@@ -23,6 +23,10 @@ public class FirebaseManager : MonoBehaviour
     public InputField registerPasswordField;
     public InputField registerPassword2Field;
     public Text registerStatusText;
+    [Header("Nickname Selection")]
+    public InputField nicknameField;
+
+    private int tempId;
 
     private PlayerInfo pInfo;
 
@@ -66,6 +70,7 @@ public class FirebaseManager : MonoBehaviour
 
     private IEnumerator Login(string _email, string _password)
     {
+        loginStatusText.text = "Logging in...";
         //Call the Firebase auth signin function passing the email and password
         var LoginTask = auth.SignInWithEmailAndPasswordAsync(_email, _password);
         //Wait until the task completes
@@ -107,17 +112,17 @@ public class FirebaseManager : MonoBehaviour
             Debug.LogFormat("User signed in successfully: {0} ({1})", User.DisplayName, User.Email);
             loginStatusText.text = "Logged In";
 
-            yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(1f);
             StartCoroutine(LoadUserData());
-
+            yield return new WaitUntil(() => pInfo != null);
             if (pInfo != null)
             {
                 if (pInfo.nickname == "") // Show 'Enter nickname' screen
                 {
-
-                } else if (pInfo.currentOutfit == 0) // Get first outfit package
+                    UIManager.ShowNick();
+                } else if (pInfo.currentOutfit == 0 && pInfo.outfits.Length <= 1) // Get first outfit package
                 {
-                     
+                    UIManager.ShowPackage();
                 } else // Just log in
                 {
                     network.StartClient();
@@ -207,7 +212,12 @@ public class FirebaseManager : MonoBehaviour
         }
     }
 
-    private IEnumerator UpdateNickname(string nick)
+    public void NicknameBtn()
+    {
+        StartCoroutine(UpdateNickname(nicknameField.text));
+    }
+
+    public IEnumerator UpdateNickname(string nick)
     {
         var DBTask = DBRefrence.Child("users").Child(User.UserId).Child("nickname").SetValueAsync(nick);
 
@@ -218,7 +228,14 @@ public class FirebaseManager : MonoBehaviour
             Debug.Log(DBTask.Exception);
         } else
         {
-            // Updated users nickname
+            if (pInfo.currentOutfit == 0 && pInfo.outfits.Length <= 1) // Get first outfit package
+            {
+                UIManager.ShowPackage();
+            }
+            else // Just log in
+            {
+                network.StartClient();
+            }
         }
     }
 
@@ -272,4 +289,27 @@ public class FirebaseManager : MonoBehaviour
         return pInfo;
     }
 
+    public void AddOutfit(int id)
+    {
+        tempId = id;
+        StartCoroutine(nameof(AddPlayerOutfit));
+    }
+
+    public IEnumerable AddPlayerOutfit()
+    {
+        string outfitS = pInfo.outfits;
+        outfitS += "," + tempId;
+        Debug.Log("Player outfits: " + outfitS);
+        var DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("outfits").SetValueAsync(outfitS);
+        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+        Debug.Log("Player " + pInfo.nickname + " retrieved outfit with id " + tempId);
+        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("currentOutfit").SetValueAsync(tempId);
+        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+        network.StartClient();
+    }
+
+    public string GetPlayerNick()
+    {
+        return pInfo.nickname;
+    }
 }

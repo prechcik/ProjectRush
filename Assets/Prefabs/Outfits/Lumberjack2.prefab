@@ -1994,3 +1994,4 @@ MonoBehaviour:
   outfitName: Lumberjack2
   id: 7
   icon: {fileID: 21300000, guid: 94ec78573006680488c8a8aa50537e40, type: 3}
+  rarity: 2

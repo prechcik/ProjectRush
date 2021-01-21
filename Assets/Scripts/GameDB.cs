@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,13 +7,17 @@ public class GameDB : MonoBehaviour
 {
 
     public List<GameObject> outfitList = new List<GameObject>();
+    public List<Sprite> packageRarities = new List<Sprite>();
 
     private List<int> randList = new List<int>();
+
+    public FirebaseManager DBManager;
 
     // Start is called before the first frame update
     void Start()
     {
         DontDestroyOnLoad(this);
+        DBManager = FindObjectOfType<FirebaseManager>();
     }
 
     // Update is called once per frame
@@ -27,7 +32,7 @@ public class GameDB : MonoBehaviour
         
         while(randList.Count < amount)
         {
-            int rand = Random.Range(0, outfitList.Count);
+            int rand = UnityEngine.Random.Range(1, outfitList.Count);
             if (!randList.Contains(rand))
             {
                 randList.Add(rand);
@@ -46,6 +51,11 @@ public class GameDB : MonoBehaviour
                 return ou;
             }
         }
-        return null;
+        return new Outfit(0, "Empty");
+    }
+
+    public Sprite GetRaritySprite(int index)
+    {
+        return packageRarities[index];
     }
 }

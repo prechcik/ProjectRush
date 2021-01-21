@@ -10,6 +10,7 @@ public class Outfit : MonoBehaviour
     public string outfitName;
     public int id;
     public Sprite icon;
+    public int rarity = 0;
 
     public Outfit(int id, string name)
     {
