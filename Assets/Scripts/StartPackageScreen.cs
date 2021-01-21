@@ -8,6 +8,7 @@ public class StartPackageScreen : MonoBehaviour
 
     public GameObject Card1, Card2, Card3, Card4, Card5;
     GameDB gameDB;
+    public float animationSpeed = 2f;
 
     private void Start()
     {
@@ -46,6 +47,14 @@ public class StartPackageScreen : MonoBehaviour
         card5Image.sprite = Card5Outfit.icon;
 
 
+    }
+
+
+    IEnumerator RevealCards(int id1, int id2, int id3, int id4, int id5)
+    {
+        Image card1Image = Card1.GetComponent<Image>();
+        float fill = Mathf.Lerp(card1Image.fillAmount, 0f, Time.deltaTime * animationSpeed);
+        card1Image.fillAmount = fill;
     }
 
 }
