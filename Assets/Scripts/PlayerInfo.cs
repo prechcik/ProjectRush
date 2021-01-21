@@ -12,7 +12,7 @@ public class PlayerInfo
     public int currentOutfit;
     public string outfits;
     public float x, y, z;
-
+    public string userId;
     public PlayerInfo(int id, string username, string nickname, int currentOutfit, string outfits, float x, float y, float z)
     {
         this.id = id;

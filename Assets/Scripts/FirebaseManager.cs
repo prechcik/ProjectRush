@@ -28,7 +28,9 @@ public class FirebaseManager : MonoBehaviour
 
     private int tempId;
 
-    private PlayerInfo pInfo;
+    public string userId;
+
+    public PlayerInfo pInfo;
 
     void Awake()
     {
@@ -114,7 +116,7 @@ public class FirebaseManager : MonoBehaviour
 
             yield return new WaitForSeconds(1f);
             StartCoroutine(LoadUserData());
-            yield return new WaitUntil(() => pInfo != null);
+            yield return new WaitForSeconds(1f);
             if (pInfo != null)
             {
                 if (pInfo.nickname == "") // Show 'Enter nickname' screen
@@ -127,6 +129,7 @@ public class FirebaseManager : MonoBehaviour
                 {
                     network.StartClient();
                 }
+                
             }
 
             
@@ -267,6 +270,7 @@ public class FirebaseManager : MonoBehaviour
             pInfo.outfits = "0";
             pInfo.currentOutfit = 0;
             pInfo.username = User.Email;
+            pInfo.userId = User.UserId;
         } else
         {
             Debug.Log("Loaded user data");
@@ -279,6 +283,7 @@ public class FirebaseManager : MonoBehaviour
             pInfo.y = float.Parse(snapshot.Child("y").Value.ToString());
             pInfo.z = float.Parse(snapshot.Child("z").Value.ToString());
             pInfo.username = User.Email;
+            pInfo.userId = User.UserId;
         }
 
     }
@@ -291,19 +296,19 @@ public class FirebaseManager : MonoBehaviour
 
     public void AddOutfit(int id)
     {
-        tempId = id;
-        StartCoroutine(nameof(AddPlayerOutfit));
+        StartCoroutine(AddPlayerOutfit(id));
     }
 
-    public IEnumerable AddPlayerOutfit()
+    public IEnumerator AddPlayerOutfit(int id)
     {
+        Debug.Log("Add " + id);
         string outfitS = pInfo.outfits;
-        outfitS += "," + tempId;
+        outfitS += "," + id;
         Debug.Log("Player outfits: " + outfitS);
         var DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("outfits").SetValueAsync(outfitS);
         yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
-        Debug.Log("Player " + pInfo.nickname + " retrieved outfit with id " + tempId);
-        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("currentOutfit").SetValueAsync(tempId);
+        Debug.Log("Player " + pInfo.nickname + " retrieved outfit with id " + id);
+        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("currentOutfit").SetValueAsync(id);
         yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
         network.StartClient();
     }
@@ -311,5 +316,17 @@ public class FirebaseManager : MonoBehaviour
     public string GetPlayerNick()
     {
         return pInfo.nickname;
+    }
+
+    public int GetPlayerOutfit(string id)
+    {
+        StartCoroutine(PlayerOutfitRoutine(id));
+        return tempId;
+    }
+
+    public IEnumerator PlayerOutfitRoutine(string id) {
+        var DBTask2 = DBRefrence.Child("users").Child(id).Child("currentOutfit").GetValueAsync();
+        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+        tempId = int.Parse(DBTask2.Result.Value.ToString());
     }
 }

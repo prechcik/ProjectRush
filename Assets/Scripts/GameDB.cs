@@ -20,6 +20,11 @@ public class GameDB : MonoBehaviour
         DBManager = FindObjectOfType<FirebaseManager>();
     }
 
+    private void Awake()
+    {
+        DBManager = FindObjectOfType<FirebaseManager>();
+    }
+
     // Update is called once per frame
     void Update()
     {

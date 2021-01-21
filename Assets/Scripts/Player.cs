@@ -11,6 +11,8 @@ public class Player : NetworkBehaviour
     public int currentOutfit;
     public PlayerInfo info;
     public GameObject modelContainer;
+    public int activeOutfit = 0;
+    public string userId;
 
     private GameDB gameDB;
 
@@ -29,6 +31,11 @@ public class Player : NetworkBehaviour
     void Update()
     {
         if (this.GetComponentInChildren<TextMesh>().text != nickname) this.GetComponentInChildren<TextMesh>().text = nickname;
+        if (activeOutfit != currentOutfit)
+        {
+            ChangeOutfit(currentOutfit);
+            
+        }
     }
 
     public void ChangeOutfit(int newOufit)
@@ -41,7 +48,9 @@ public class Player : NetworkBehaviour
             Outfit ou = o.GetComponent<Outfit>();
             if (ou != null && ou.id == newOufit)
             {
-                Instantiate(o, modelContainer.transform);
+                GameObject playerModel = Instantiate(o, Vector3.zero, Quaternion.identity, modelContainer.transform);
+                playerModel.transform.localPosition = Vector3.zero;
+                activeOutfit = currentOutfit;
             }
         }
     }

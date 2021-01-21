@@ -1360,6 +1360,17 @@ MonoBehaviour:
   registerPassword2Field: {fileID: 1497343101}
   registerStatusText: {fileID: 1218231122}
   nicknameField: {fileID: 1294839625}
+  userId: 
+  pInfo:
+    id: 0
+    username: 
+    nickname: 
+    currentOutfit: 0
+    outfits: 
+    x: 0
+    y: 0
+    z: 0
+    userId: 
 --- !u!4 &542818203
 Transform:
   m_ObjectHideFlags: 0
@@ -4634,12 +4645,12 @@ MonoBehaviour:
   dontDestroyOnLoad: 1
   runInBackground: 1
   autoStartServerBuild: 1
-  showDebugMessages: 0
+  showDebugMessages: 1
   serverTickRate: 30
   offlineScene: 
   onlineScene: 
   transport: {fileID: 1863811566}
-  networkAddress: 192.168.0.110
+  networkAddress: 35.153.98.121
   maxConnections: 100
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60

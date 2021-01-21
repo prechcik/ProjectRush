@@ -12,6 +12,7 @@ public class NetworkManagement : NetworkManager
 {
     public struct PlayerMessage : NetworkMessage
     {
+        public string userId;
         public string nickname;
         public int currentOutfit;
         public Vector3 pos;
@@ -139,7 +140,9 @@ public override void OnClientSceneChanged(NetworkConnection conn)
 /// <para>Unity calls this on the Server when a Client connects to the Server. Use an override to tell the NetworkManager what to do when a client connects to the server.</para>
 /// </summary>
 /// <param name="conn">Connection from client.</param>
-public override void OnServerConnect(NetworkConnection conn) { }
+public override void OnServerConnect(NetworkConnection conn) {
+        Debug.Log("Player connected " + conn.address);
+    }
 
 /// <summary>
 /// Called on the server when a client is ready.
@@ -169,6 +172,7 @@ public override void OnServerAddPlayer(NetworkConnection conn)
 public override void OnServerDisconnect(NetworkConnection conn)
 {
     base.OnServerDisconnect(conn);
+        Debug.Log("Player disconnected " + conn.address);
 }
 
 /// <summary>
@@ -192,6 +196,7 @@ public override void OnClientConnect(NetworkConnection conn)
         base.OnClientConnect(conn);
         PlayerMessage msg = new PlayerMessage();
         PlayerInfo p = DBManager.GetPlayerInfo();
+        msg.userId = p.userId;
         msg.nickname = p.nickname;
         msg.currentOutfit = p.currentOutfit;
         msg.pos = new Vector3(p.x, p.y, p.z);
@@ -278,11 +283,13 @@ public override void OnStopClient() { }
     {
         
         GameObject obj = GameObject.Instantiate(playerPrefab, message.pos, Quaternion.identity) ;
-        obj.gameObject.name = message.nickname;
+        obj.transform.name = message.nickname;
         Player p = obj.GetComponent<Player>();
 
         p.nickname = message.nickname;
         p.currentOutfit = message.currentOutfit;
+        p.userId = message.userId;
+
 
         NavMeshAgent agent = obj.GetComponent<NavMeshAgent>();
         agent.enabled = false;
