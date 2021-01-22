@@ -118,16 +118,14 @@ public class FirebaseManager : MonoBehaviour
             User = LoginTask.Result;
             Debug.LogFormat("User signed in successfully: {0} ({1})", User.DisplayName, User.Email);
             loginStatusText.text = "Logged In";
-
-            yield return new WaitForSeconds(1f);
             StartCoroutine(LoadUserData());
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(2f);
             if (pInfo != null)
             {
                 if (pInfo.nickname == "") // Show 'Enter nickname' screen
                 {
                     UIManager.ShowNick();
-                } else if (pInfo.currentOutfit == 0 && pInfo.outfits.Length <= 1) // Get first outfit package
+                } else if (pInfo.outfits.Length <= 1) // Get first outfit package
                 {
                     UIManager.ShowPackage();
                 } else // Just log in
@@ -316,6 +314,7 @@ public class FirebaseManager : MonoBehaviour
 
     public IEnumerator AddPlayerOutfit(int id)
     {
+        SceneManager.LoadSceneAsync("MainGame");
         Debug.Log("Add " + id);
         string outfitS = pInfo.outfits;
         outfitS += "," + id;
@@ -325,6 +324,8 @@ public class FirebaseManager : MonoBehaviour
         Debug.Log("Player " + pInfo.nickname + " retrieved outfit with id " + id);
         DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("currentOutfit").SetValueAsync(id);
         yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+        ReloadData();
+        
         network.StartClient();
     }
 
@@ -374,7 +375,31 @@ public class FirebaseManager : MonoBehaviour
         }
 
 
-        StartCoroutine(LoadUserData());
+        ReloadData();
 
+    }
+
+    public void ReloadData()
+    {
+        StartCoroutine(LoadUserData());
+    }
+
+    public void UpdatePlayerData(PlayerInfo p)
+    {
+        StartCoroutine(UPlayerData(p));   
+    }
+
+    public IEnumerator UPlayerData(PlayerInfo p)
+    {
+        var DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("nickname").SetValueAsync(p.nickname);
+        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("currentOutfit").SetValueAsync(p.currentOutfit);
+        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("x").SetValueAsync(p.x);
+        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("y").SetValueAsync(p.y);
+        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("z").SetValueAsync(p.z);
+        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
     }
 }

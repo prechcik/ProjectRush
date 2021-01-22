@@ -213,6 +213,18 @@ public override void OnClientConnect(NetworkConnection conn)
 /// <param name="conn">Connection to the server.</param>
 public override void OnClientDisconnect(NetworkConnection conn)
 {
+        PlayerInfo info = new PlayerInfo();
+        Player p = conn.identity.GetComponent<Player>();
+        Debug.Log("Player " + p.nickname + " has disconnected");
+        info.userId = p.userId;
+        info.nickname = p.nickname;
+        info.currentOutfit = p.currentOutfit;
+        info.x = p.transform.position.x;
+        info.y = p.transform.position.y;
+        info.z = p.transform.position.z;
+
+
+        DBManager.UpdatePlayerData(info);
     base.OnClientDisconnect(conn);
 }
 
@@ -293,6 +305,15 @@ public override void OnStopClient() { }
         p.currentOutfit = message.currentOutfit;
         p.userId = message.userId;
 
+        p.info = new PlayerInfo
+        {
+            nickname = message.nickname,
+            userId = message.userId,
+            currentOutfit = message.currentOutfit,
+            x = message.pos.x,
+            y = message.pos.y,
+            z = message.pos.z
+        };
 
         NavMeshAgent agent = obj.GetComponent<NavMeshAgent>();
         agent.enabled = false;

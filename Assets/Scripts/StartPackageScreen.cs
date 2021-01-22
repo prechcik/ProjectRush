@@ -47,7 +47,7 @@ public class StartPackageScreen : MonoBehaviour
             card.cardOutfit.sprite = outfitList[i].icon;
             card.cardRarity.sprite = gameDB.GetRaritySprite(outfitList[i].rarity);
             card.cardAnimator.SetTrigger("Reveal");
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.2f);
         }
         yield return null;
 
