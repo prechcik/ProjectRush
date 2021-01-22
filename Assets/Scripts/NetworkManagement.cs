@@ -193,6 +193,7 @@ public override void OnServerError(NetworkConnection conn, int errorCode) { }
 /// <param name="conn">Connection to the server.</param>
 public override void OnClientConnect(NetworkConnection conn)
 {
+        Debug.Log("Client connected, retrieving character info");
         base.OnClientConnect(conn);
         PlayerMessage msg = new PlayerMessage();
         PlayerInfo p = DBManager.GetPlayerInfo();

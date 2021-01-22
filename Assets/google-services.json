@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "117145111552",
+    "project_id": "projectrush-f4d1a",
+    "storage_bucket": "projectrush-f4d1a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:117145111552:android:00089bd65ae85f7d921ce5",
+        "android_client_info": {
+          "package_name": "com.DefaultCompany.ProjectRush"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "117145111552-576115n3k6loj1ae9t5286urooju39l3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxcEnnb7Kagyrlcczdj4R1U4FfMQ9-KP0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "117145111552-576115n3k6loj1ae9t5286urooju39l3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
