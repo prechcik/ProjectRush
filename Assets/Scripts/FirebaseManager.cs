@@ -6,6 +6,7 @@ using Firebase.Auth;
 using Firebase.Database;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System;
 
 public class FirebaseManager : MonoBehaviour
 {
@@ -26,12 +27,15 @@ public class FirebaseManager : MonoBehaviour
     public Text registerStatusText;
     [Header("Nickname Selection")]
     public InputField nicknameField;
+    public Text nicknameStatus;
 
     private int tempId;
 
     public string userId;
 
     public PlayerInfo pInfo;
+
+    private bool nicknameTaken = false;
 
     void Awake()
     {
@@ -219,11 +223,18 @@ public class FirebaseManager : MonoBehaviour
 
     public void NicknameBtn()
     {
-        StartCoroutine(UpdateNickname(nicknameField.text));
+        string u = nicknameField.text;
+        DBRefrence.Child("users").OrderByChild("nickname").EqualTo(u).ValueChanged += HandleNicknameChanged;
+        
+        
+        
     }
+
 
     public IEnumerator UpdateNickname(string nick)
     {
+        
+
         var DBTask = DBRefrence.Child("users").Child(User.UserId).Child("nickname").SetValueAsync(nick);
 
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
@@ -231,7 +242,8 @@ public class FirebaseManager : MonoBehaviour
         if (DBTask.Exception != null)
         {
             Debug.Log(DBTask.Exception);
-        } else
+        }
+        else
         {
             if (pInfo.currentOutfit == 0 && pInfo.outfits.Length <= 1) // Get first outfit package
             {
@@ -239,6 +251,7 @@ public class FirebaseManager : MonoBehaviour
             }
             else // Just log in
             {
+                SceneManager.LoadSceneAsync("MainGame");
                 network.StartClient();
             }
         }
@@ -330,5 +343,38 @@ public class FirebaseManager : MonoBehaviour
         var DBTask2 = DBRefrence.Child("users").Child(id).Child("currentOutfit").GetValueAsync();
         yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
         tempId = int.Parse(DBTask2.Result.Value.ToString());
+    }
+
+    void HandleNicknameChanged(object sender, ValueChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.Log("Database error: " + args.DatabaseError.Message);
+        } else
+        {
+            DataSnapshot snapshot = args.Snapshot;
+            if (!snapshot.Exists)
+            {
+                Debug.Log("Nickname free");
+                nicknameTaken = false;
+            } else
+            {
+                Debug.Log("Nickname taken");
+                nicknameTaken = true;
+            }
+
+            if (!nicknameTaken)
+            {
+                StartCoroutine(UpdateNickname(nicknameField.text));
+            }
+            else
+            {
+                nicknameStatus.text = "Nickname is already taken! Please try another!";
+            }
+        }
+
+
+        StartCoroutine(LoadUserData());
+
     }
 }

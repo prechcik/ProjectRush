@@ -250,6 +250,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  mask:
+    serializedVersion: 2
+    m_Bits: 19
 --- !u!195 &70330953
 NavMeshAgent:
   m_ObjectHideFlags: 0

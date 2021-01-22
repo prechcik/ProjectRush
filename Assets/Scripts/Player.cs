@@ -15,6 +15,7 @@ public class Player : NetworkBehaviour
     public string userId;
 
     private GameDB gameDB;
+    private MainUI mainUI;
 
     // Start is called before the first frame update
     void Start()
@@ -22,6 +23,8 @@ public class Player : NetworkBehaviour
         if (isLocalPlayer)
         {
             Camera.main.GetComponent<CameraMovement>().target = this.transform;
+            mainUI = FindObjectOfType<MainUI>();
+            mainUI.HideBlank();
 
         }
         gameDB = FindObjectOfType<GameDB>();
