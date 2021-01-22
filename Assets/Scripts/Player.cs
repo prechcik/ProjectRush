@@ -48,7 +48,7 @@ public class Player : NetworkBehaviour
             Outfit ou = o.GetComponent<Outfit>();
             if (ou != null && ou.id == newOufit)
             {
-                GameObject playerModel = Instantiate(o, Vector3.zero, Quaternion.identity, modelContainer.transform);
+                GameObject playerModel = Instantiate(o, Vector3.zero, transform.rotation, modelContainer.transform);
                 playerModel.transform.localPosition = Vector3.zero;
                 activeOutfit = currentOutfit;
             }
