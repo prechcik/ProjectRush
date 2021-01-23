@@ -274,9 +274,9 @@ namespace Mirror
             UpdateScene();
         }
 
-        #endregion
+#endregion
 
-        #region Start & Stop
+#region Start & Stop
 
         // keep the online scene change check in a separate function
         bool IsServerOnlineSceneChangeNeeded()
@@ -805,9 +805,9 @@ namespace Mirror
             logger.Log("NetworkManager destroyed");
         }
 
-        #endregion
+#endregion
 
-        #region Scene Management
+#region Scene Management
 
         /// <summary>
         /// The name of the current network scene.
@@ -1081,9 +1081,9 @@ namespace Mirror
             }
         }
 
-        #endregion
+#endregion
 
-        #region Start Positions
+#region Start Positions
 
         public static int startPositionIndex;
 
@@ -1145,9 +1145,9 @@ namespace Mirror
             }
         }
 
-        #endregion
+#endregion
 
-        #region Server Internal Message Handlers
+#region Server Internal Message Handlers
 
         void OnServerConnectInternal(NetworkConnection conn, ConnectMessage connectMsg)
         {
@@ -1226,9 +1226,9 @@ namespace Mirror
             OnServerError(conn, msg.value);
         }
 
-        #endregion
+#endregion
 
-        #region Client Internal Message Handlers
+#region Client Internal Message Handlers
 
         void OnClientConnectInternal(NetworkConnection conn, ConnectMessage message)
         {
@@ -1300,9 +1300,9 @@ namespace Mirror
             }
         }
 
-        #endregion
+#endregion
 
-        #region Server System Callbacks
+#region Server System Callbacks
 
         /// <summary>
         /// Called on the server when a new client connects.
@@ -1372,9 +1372,9 @@ namespace Mirror
         /// <param name="sceneName">The name of the new scene.</param>
         public virtual void OnServerSceneChanged(string sceneName) { }
 
-        #endregion
+#endregion
 
-        #region Client System Callbacks
+#region Client System Callbacks
 
         /// <summary>
         /// Called on the client when connected to a server.
@@ -1448,9 +1448,9 @@ namespace Mirror
             }
         }
 
-        #endregion
+#endregion
 
-        #region Start & Stop callbacks
+#region Start & Stop callbacks
 
         // Since there are multiple versions of StartServer, StartClient and StartHost, to reliably customize
         // their functionality, users would need override all the versions. Instead these callbacks are invoked
@@ -1488,6 +1488,6 @@ namespace Mirror
         /// </summary>
         public virtual void OnStopHost() { }
 
-        #endregion
+#endregion
     }
 }

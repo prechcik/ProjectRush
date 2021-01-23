@@ -14,7 +14,8 @@ public class Outfit : MonoBehaviour
 
     public Outfit(int id, string name)
     {
-        this.outfitName = name;
         this.id = id;
+        this.outfitName = name;
     }
+
 }

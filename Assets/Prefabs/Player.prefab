@@ -153,7 +153,6 @@ GameObject:
   - component: {fileID: 1511290657308344486}
   - component: {fileID: 70330953}
   - component: {fileID: 9026805132175965578}
-  - component: {fileID: 7283763919728583309}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -206,6 +205,7 @@ MonoBehaviour:
   modelContainer: {fileID: 7634858282611772286}
   activeOutfit: 0
   userId: 
+  playerRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!136 &7634858284095974181
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -263,10 +263,10 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.3
-  m_Speed: 2
-  m_Acceleration: 2
+  m_Speed: 1
+  m_Acceleration: 1
   avoidancePriority: 50
-  m_AngularSpeed: 8000
+  m_AngularSpeed: 30000
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
@@ -291,21 +291,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &7283763919728583309
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7634858284095974179}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  clientAuthority: 1
-  localPositionSensitivity: 0.0001
-  localRotationSensitivity: 0.0001
-  localScaleSensitivity: 0.01

@@ -8,6 +8,9 @@ public class LoginUI : MonoBehaviour
 
     public InputField email;
 
+    private NetworkManagement network;
+    private FirebaseManager DBManager;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -15,11 +18,18 @@ public class LoginUI : MonoBehaviour
         {
             email.text = PlayerPrefs.GetString("SavedEmail");
         }
+        network = FindObjectOfType<NetworkManagement>();
+        DBManager = FindObjectOfType<FirebaseManager>();
     }
 
     public void SaveEmail()
     {
         PlayerPrefs.SetString("SavedEmail", email.text);
+    }
+
+    public void SendLogin()
+    {
+        network.LoginBtn();
     }
 
     

@@ -55,4 +55,21 @@ public class BuildScript
         BuildPipeline.BuildPlayer(buildPlayerOptions);
         Console.WriteLine("Built Client (Windows).");
     }
+
+    [MenuItem("Build/Build APK")]
+    public static void BuildApk()
+    {
+        BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
+        buildPlayerOptions.scenes = new[] { "Assets/Scenes/MainMenu.unity", "Assets/Scenes/MainGame.unity" };
+        buildPlayerOptions.locationPathName = "Builds/ProjectRush.apk";
+        buildPlayerOptions.target = BuildTarget.Android;
+        BuildPipeline.BuildPlayer(buildPlayerOptions);
+    }
+
+    [MenuItem("Build/Build Server and Client (Windows)")]
+    public static void BuildClientServer()
+    {
+        BuildWindowsServer();
+        BuildWindowsClient();
+    }
 }

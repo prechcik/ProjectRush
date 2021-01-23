@@ -2,6 +2,11 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
 using UnityEngine.AI;
+using Firebase;
+using Firebase.Auth;
+using System.Collections;
+using Firebase.Database;
+using System.Collections.Generic;
 
 /*
 	Documentation: https://mirror-networking.com/docs/Components/NetworkManager.html
@@ -15,12 +20,64 @@ public class NetworkManagement : NetworkManager
         public string userId;
         public string nickname;
         public int currentOutfit;
+        public string outfits;
         public Vector3 pos;
+    }
+
+    public struct LoginRequest : NetworkMessage
+    {
+        public string email;
+        public string password;
+    }
+
+    public struct LoginResponse : NetworkMessage
+    {
+        public string result;
+        public PlayerInfo info;
+    }
+
+    public struct PlayerRequest : NetworkMessage
+    {
+        public string result;
+    }
+
+    public struct PlayerOutfitRequest : NetworkMessage { }
+
+    public struct PlayerOutfitResult : NetworkMessage
+    {
+        public int[] outfits;
+    }
+
+    public struct ClientReadyForPlayer : NetworkMessage
+    {
+
+    }
+
+    public struct NicknameRequest : NetworkMessage
+    {
+        public string nick;
+    }
+
+    public struct NicknameResponse : NetworkMessage
+    {
+        public string response;
+        public string nickname;
+    }
+
+
+
+    public struct OutfitRequest : NetworkMessage
+    {
+        public int outfitid;
     }
 
     public FirebaseManager DBManager;
 
     public NetworkStartPosition defaultStart;
+
+    private GameObject tempObj;
+
+    public PlayerInfo playerInfo;
 
     #region Unity Callbacks
 
@@ -46,12 +103,16 @@ public override void Awake()
 public override void Start()
 {
     base.Start();
-}
+        StartClient();
+        DBManager = FindObjectOfType<FirebaseManager>();
+    }
 
-/// <summary>
-/// Runs on both Server and Client
-/// </summary>
-public override void LateUpdate()
+
+
+    /// <summary>
+    /// Runs on both Server and Client
+    /// </summary>
+    public override void LateUpdate()
 {
     base.LateUpdate();
 }
@@ -171,8 +232,12 @@ public override void OnServerAddPlayer(NetworkConnection conn)
 /// <param name="conn">Connection from client.</param>
 public override void OnServerDisconnect(NetworkConnection conn)
 {
+        Transform playerObj = conn.identity.transform;
+        Player p = playerPrefab.GetComponent<Player>();
+        StartCoroutine(DBManager.UpdatePosition(playerObj.position));
     base.OnServerDisconnect(conn);
-        Debug.Log("Player disconnected " + conn.address);
+        Debug.Log("Player " + p.nickname + " disconnected " + conn.address);
+
 }
 
 /// <summary>
@@ -193,17 +258,7 @@ public override void OnServerError(NetworkConnection conn, int errorCode) { }
 /// <param name="conn">Connection to the server.</param>
 public override void OnClientConnect(NetworkConnection conn)
 {
-        Debug.Log("Client connected, retrieving character info");
         base.OnClientConnect(conn);
-        PlayerMessage msg = new PlayerMessage();
-        PlayerInfo p = DBManager.GetPlayerInfo();
-        msg.userId = p.userId;
-        msg.nickname = p.nickname;
-        msg.currentOutfit = p.currentOutfit;
-        msg.pos = new Vector3(p.x, p.y, p.z);
-        Debug.Log("Sending PlayerMessage: " + msg.nickname + ", pos: " + msg.pos.ToString());
-        conn.Send(msg);
-        
     }
 
 /// <summary>
@@ -213,20 +268,15 @@ public override void OnClientConnect(NetworkConnection conn)
 /// <param name="conn">Connection to the server.</param>
 public override void OnClientDisconnect(NetworkConnection conn)
 {
-        PlayerInfo info = new PlayerInfo();
-        Player p = conn.identity.GetComponent<Player>();
-        Debug.Log("Player " + p.nickname + " has disconnected");
-        info.userId = p.userId;
-        info.nickname = p.nickname;
-        info.currentOutfit = p.currentOutfit;
-        info.x = p.transform.position.x;
-        info.y = p.transform.position.y;
-        info.z = p.transform.position.z;
-
-
-        DBManager.UpdatePlayerData(info);
+        StartCoroutine(DisconnectLog("Server has disconnected"));
     base.OnClientDisconnect(conn);
 }
+
+    private IEnumerator DisconnectLog(string msg)
+    {
+        yield return SceneManager.LoadSceneAsync("MainMenu");
+        DBManager.loginStatusText.text = msg;
+    }
 
 /// <summary>
 /// Called on clients when a network error occurs.
@@ -265,6 +315,12 @@ public override void OnStartHost() { }
 public override void OnStartServer() {
         base.OnStartServer();
         NetworkServer.RegisterHandler<PlayerMessage>(OnPlayerMessage);
+        NetworkServer.RegisterHandler<LoginRequest>(OnLoginRequest);
+        NetworkServer.RegisterHandler<PlayerOutfitRequest>(OnOutfitRequest);
+        NetworkServer.RegisterHandler<OutfitRequest>(OnPlayerChangeOutfit);
+        NetworkServer.RegisterHandler<ClientReadyForPlayer>(OnClientReadyToSpawn);
+        NetworkServer.RegisterHandler<NicknameRequest>(OnNicknameRequest);
+        Debug.Log("Initializing server map");
         SceneManager.LoadSceneAsync("MainGame");
     }
 
@@ -272,7 +328,9 @@ public override void OnStartServer() {
 /// This is invoked when the client is started.
 /// </summary>
 public override void OnStartClient() {
-        
+        NetworkClient.RegisterHandler<LoginResponse>(OnLoginResponse);
+        NetworkClient.RegisterHandler<PlayerOutfitResult>(OnOutfitResult);
+        NetworkClient.RegisterHandler<NicknameResponse>(OnNicknameResponse);
     }
 
 /// <summary>
@@ -323,10 +381,320 @@ public override void OnStopClient() { }
         Debug.Log("Player connected: " + p.nickname);
     }
 
+    
 
-    public void ConnectClient(PlayerInfo p)
+    void OnLoginRequest(NetworkConnection conn, LoginRequest message)
+    {
+        Debug.Log("Connection " + conn.address + " is requesting login for username " + message.email);
+        StartCoroutine(LoginEnum(message, conn));
+    }
+
+
+    IEnumerator LoginEnum(LoginRequest message, NetworkConnection conn)
+    {
+        var LoginTask = DBManager.auth.SignInWithEmailAndPasswordAsync(message.email, message.password);
+        //Wait until the task completes
+        yield return new WaitUntil(predicate: () => LoginTask.IsCompleted);
+
+        if (LoginTask.Exception != null)
+        {
+            //If there are errors handle them
+            Debug.LogWarning(message: $"Failed to register task with {LoginTask.Exception}");
+            FirebaseException firebaseEx = LoginTask.Exception.GetBaseException() as FirebaseException;
+            AuthError errorCode = (AuthError)firebaseEx.ErrorCode;
+
+            string emessage = "Login Failed!";
+            switch (errorCode)
+            {
+                case AuthError.MissingEmail:
+                    emessage = "Missing Email";
+                    break;
+                case AuthError.MissingPassword:
+                    emessage = "Missing Password";
+                    break;
+                case AuthError.WrongPassword:
+                    emessage = "Wrong Password";
+                    break;
+                case AuthError.InvalidEmail:
+                    emessage = "Invalid Email";
+                    break;
+                case AuthError.UserNotFound:
+                    emessage = "Account does not exist";
+                    break;
+            }
+            LoginResponse r = new LoginResponse
+            {
+                result = emessage
+            };
+            conn.Send(r);
+            //loginStatusText.text = message;
+        }
+        else
+        {
+            //User is now logged in
+            //Now get the result
+            DBManager.User = LoginTask.Result;
+            Debug.LogFormat("Firebase: User signed in successfully: {0} ({1})", DBManager.User.DisplayName, DBManager.User.Email);
+
+            var DBTask = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).GetValueAsync();
+
+            yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+            
+
+            if (DBTask.Exception != null)
+            {
+                Debug.Log(DBTask.Exception);
+            }
+            else if (DBTask.Result.Value == null)
+            {
+                Debug.Log("User DB is empty, creating sample data");
+                var DBTask2 = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("nickname").SetValueAsync("");
+                yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                DBTask2 = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("currentOutfit").SetValueAsync(0);
+                yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                DBTask2 = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("outfits").SetValueAsync("0");
+                yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                DBTask2 = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("x").SetValueAsync(0);
+                yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                DBTask2 = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("y").SetValueAsync(0);
+                yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                DBTask2 = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("z").SetValueAsync(0);
+                yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                PlayerInfo pInfo = new PlayerInfo
+                {
+                    nickname = "",
+                    outfits = "0",
+                    currentOutfit = 0,
+                    username = DBManager.User.Email,
+                    userId = DBManager.User.UserId,
+                    x = 0,
+                    y = 0,
+                    z = 0
+                };
+                DBManager.pInfo = pInfo;
+                OnPlayerInfo(conn, pInfo);
+            }
+            else
+            {
+                
+                DataSnapshot snapshot = DBTask.Result;
+                PlayerInfo pInfo = new PlayerInfo
+                {
+                    nickname = snapshot.Child("nickname").Value.ToString(),
+                    currentOutfit = int.Parse(snapshot.Child("currentOutfit").Value.ToString()),
+                    outfits = snapshot.Child("outfits").Value.ToString(),
+                    x = float.Parse(snapshot.Child("x").Value.ToString()),
+                    y = float.Parse(snapshot.Child("y").Value.ToString()),
+                    z = float.Parse(snapshot.Child("z").Value.ToString()),
+                    username = DBManager.User.Email,
+                    userId = DBManager.User.UserId
+                };
+                Debug.Log("Loaded user data - " + pInfo.nickname);
+                DBManager.pInfo = pInfo;
+                OnPlayerInfo(conn, pInfo);
+            }
+
+            
+
+            
+
+        }
+    }
+
+
+    void OnLoginResponse(NetworkConnection conn, LoginResponse message)
+    {
+        Debug.Log("Received login response from server: " + message.result);
+        if (message.result == "OK")
+        {
+            playerInfo = message.info;
+            if (message.info.nickname.Length < 1)
+            {
+                UIManager.ShowNick();
+            }
+            else if (message.info.currentOutfit == 0)
+            {
+                UIManager.ShowPackage();
+            }
+            else
+            {
+                SceneManager.LoadSceneAsync("MainGame");
+                conn.Send(new ClientReadyForPlayer());
+            }
+        } else
+        {
+            if (SceneManager.GetActiveScene().name != "MainMenu")
+            {
+                SceneManager.LoadSceneAsync("MainMenu");
+                
+            }
+            DBManager.loginStatusText.text = message.result;
+        }
+    }
+
+
+    void OnPlayerInfo(NetworkConnection conn, PlayerInfo info)
+    {
+        LoginResponse r = new LoginResponse
+        {
+            result = "OK",
+            info = info
+        };
+        conn.Send(r);
+
+        GameObject obj = GameObject.Instantiate(playerPrefab, new Vector3(info.x,info.y,info.z), Quaternion.identity);
+        Debug.Log("Spawning " + info.nickname + " at (" + info.x + "," + info.y + "," + info.z + ")");
+        NavMeshAgent agent = obj.GetComponent<NavMeshAgent>();
+        agent.Warp(new Vector3(info.x, info.y, info.z));
+        agent.enabled = false;
+        obj.name = info.nickname;
+        Player p = obj.GetComponent<Player>();
+
+        p.nickname = info.nickname;
+        p.currentOutfit = info.currentOutfit;
+        p.userId = info.userId;
+        p.info = info;
+
+        
+        agent.enabled = true;
+
+        tempObj = obj;
+        
+
+        
+        Debug.Log("Player connected: " + p.nickname);
+    }
+
+    public void OnClientReadyToSpawn(NetworkConnection conn, ClientReadyForPlayer message)
+    {
+        NetworkServer.AddPlayerForConnection(conn, tempObj);
+    }
+
+    
+
+    public void LoginBtn()
+    {
+        if (DBManager.loginUserField.text.Length < 1 || DBManager.loginPasswordField.text.Length < 1)
+        {
+            DBManager.loginStatusText.text = "Please enter both email and password!";
+            return;
+        }
+        Debug.Log("Sending login request");
+        
+        LoginRequest r = new LoginRequest
+        {
+            email = DBManager.loginUserField.text,
+            password = DBManager.loginPasswordField.text
+        };
+        NetworkClient.Send(r);
+        
+    }
+
+
+    public void OnOutfitRequest(NetworkConnection conn, PlayerOutfitRequest message)
+    {
+        StartCoroutine(GetOutfits(conn));
+    }
+
+    public void OnOutfitResult(NetworkConnection conn, PlayerOutfitResult message)
+    {
+        Debug.Log("Player outfits: ");
+        foreach (int outfit in message.outfits)
+        {
+            Debug.Log("Outfit id: " + outfit);
+        }
+        OutfitPanel panel = FindObjectOfType<OutfitPanel>();
+        panel.PopulateIcons(new List<int>(message.outfits));
+    }
+
+
+    IEnumerator GetOutfits(NetworkConnection conn)
+    {
+        Player p = conn.identity.GetComponent<Player>();
+        Debug.Log("Received outfit list request for player " + p.nickname);
+        var DBTask = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("outfits").GetValueAsync();
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+        if (DBTask.Exception != null)
+        {
+            Debug.Log(DBTask.Exception);
+        }
+        else
+        {
+            string res = DBTask.Result.Value.ToString();
+            int[] outfits = System.Array.ConvertAll(res.Split(','), int.Parse);
+            p.outfits = new List<int>(outfits);
+            PlayerOutfitResult msg = new PlayerOutfitResult
+            {
+                outfits = outfits
+            };
+            conn.Send(msg);
+
+        }
+    }
+
+    public void OnPlayerChangeOutfit(NetworkConnection conn, OutfitRequest message)
+    {
+        conn.identity.GetComponent<Player>().currentOutfit = message.outfitid;
+        Debug.Log("Player " + conn.identity.GetComponent<Player>().nickname + " has changed outfit to id " + message.outfitid);
+    }
+
+    public void NicknameBtn()
+    {
+        NetworkClient.Send(new NicknameRequest { nick = DBManager.nicknameField.text });
+    }
+
+    public void CheckAndSendNickname()
     {
 
     }
+
+    public void OnNicknameRequest(NetworkConnection conn, NicknameRequest message)
+    {
+        var DBTask = DBManager.DBRefrence.Child("users").OrderByChild("nickname").EqualTo(message.nick).GetValueAsync().ContinueWith(task =>
+        {
+            NicknameResponse response = new NicknameResponse { };
+            DataSnapshot snapshot = task.Result;
+            if (snapshot.Exists)
+            {
+                response.response = "Username already exists";
+                response.nickname = "";
+            } else
+            {
+                response.response = "OK";
+                response.nickname = message.nick;
+                StartCoroutine(NicknameEnum(conn, message.nick));
+            }
+            conn.Send(response);
+        });
+    }
+
+    public void OnNicknameResponse(NetworkConnection conn, NicknameResponse message)
+    {
+        if (message.response == "OK")
+        {
+            Debug.Log("Username was free");
+            UIManager.ShowPackage();
+        } else
+        {
+            DBManager.nicknameStatus.text = message.response;
+        }
+    }
+
+    IEnumerator NicknameEnum(NetworkConnection conn, string nick)
+    {
+        var DBTask = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("nickname").SetValueAsync(nick);
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        if (DBTask.Exception != null)
+        {
+            Debug.Log(DBTask.Exception);
+        }
+        else
+        {
+            
+        }
+    }
+
+
 
 }

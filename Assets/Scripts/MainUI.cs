@@ -7,6 +7,8 @@ public class MainUI : MonoBehaviour
 
     public GameObject blankObj;
     public GameObject bottomPanel;
+    public GameObject expPanelImage;
+    public GameObject expPanelText;
     // Start is called before the first frame update
     
 

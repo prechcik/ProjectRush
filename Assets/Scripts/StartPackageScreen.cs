@@ -43,7 +43,7 @@ public class StartPackageScreen : MonoBehaviour
             GameObject CardObj = Instantiate(CardPrefab, ContentScreen.transform);
             OutfitCard card = CardObj.GetComponent<OutfitCard>();
             int outfitId = ids[i];
-            card.cardButton.onClick.AddListener(delegate { gameDB.DBManager.AddOutfit(outfitId); Debug.Log("Sending outfit id request [" + outfitId + "] for player " + gameDB.DBManager.GetPlayerInfo().nickname); });
+            card.cardButton.onClick.AddListener(delegate { gameDB.DBManager.AddOutfit(outfitId); Debug.Log("Sending outfit id request [" + outfitId + "] for player "); });
             card.cardOutfit.sprite = outfitList[i].icon;
             card.cardRarity.sprite = gameDB.GetRaritySprite(outfitList[i].rarity);
             card.cardAnimator.SetTrigger("Reveal");

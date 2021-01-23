@@ -1,7 +1,9 @@
+using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameDB : MonoBehaviour
 {
@@ -13,15 +15,20 @@ public class GameDB : MonoBehaviour
 
     public FirebaseManager DBManager;
 
+
     // Start is called before the first frame update
     void Start()
     {
-        DontDestroyOnLoad(this);
+
+        DontDestroyOnLoad(this.gameObject);
         DBManager = FindObjectOfType<FirebaseManager>();
+
+
     }
 
     private void Awake()
     {
+        DontDestroyOnLoad(this.gameObject);
         DBManager = FindObjectOfType<FirebaseManager>();
     }
 
@@ -56,7 +63,7 @@ public class GameDB : MonoBehaviour
                 return ou;
             }
         }
-        return new Outfit(0, "Empty");
+        return null;
     }
 
     public Sprite GetRaritySprite(int index)
