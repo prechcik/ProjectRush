@@ -33,7 +33,9 @@ public class PlayerMovement : NetworkBehaviour
             RaycastHit hit;
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity, mask))
             {
-                if (EventSystem.current.IsPointerOverGameObject(touchIndex)) { return; }
+                if (EventSystem.current.IsPointerOverGameObject(touchIndex)) { 
+                    return;
+                }
                 agent.SetDestination(hit.point);
             }
         }

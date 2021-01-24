@@ -37,7 +37,6 @@ public class FirebaseManager : MonoBehaviour
 
     public PlayerInfo pInfo;
 
-    private bool nicknameTaken = false;
 
 
     private int[] tempOutfits;
@@ -242,13 +241,20 @@ public class FirebaseManager : MonoBehaviour
         }
     }
 
-    public IEnumerator UpdatePosition(Vector3 pos)
+
+    public IEnumerator UpdatePlayerInfo(Player p)
     {
-        var DBTask = DBRefrence.Child("users").Child(User.UserId).Child("x").SetValueAsync(pos.x);
+        var DBTask = DBRefrence.Child("users").Child(User.UserId).Child("x").SetValueAsync(p.lastPos.x);
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
-        DBTask = DBRefrence.Child("users").Child(User.UserId).Child("y").SetValueAsync(pos.y);
+        DBTask = DBRefrence.Child("users").Child(User.UserId).Child("y").SetValueAsync(p.lastPos.y);
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
-        DBTask = DBRefrence.Child("users").Child(User.UserId).Child("z").SetValueAsync(pos.z);
+        DBTask = DBRefrence.Child("users").Child(User.UserId).Child("z").SetValueAsync(p.lastPos.z);
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+        DBTask = DBRefrence.Child("users").Child(User.UserId).Child("currentOutfit").SetValueAsync(p.activeOutfit);
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+        DBTask = DBRefrence.Child("users").Child(User.UserId).Child("experience").SetValueAsync(p.currentExp);
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+        DBTask = DBRefrence.Child("users").Child(User.UserId).Child("level").SetValueAsync(p.currentLevel);
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
     }
 
@@ -314,8 +320,11 @@ public class FirebaseManager : MonoBehaviour
         yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
         DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("z").SetValueAsync(p.z);
         yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("outfits").SetValueAsync(p.outfits);
+        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+
     }
 
-
+    
     
 }

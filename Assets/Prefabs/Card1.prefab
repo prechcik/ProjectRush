@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6022850716931569916}
   - component: {fileID: 6022850716931569914}
   - component: {fileID: 6022850716931569915}
+  - component: {fileID: 2871411121885654478}
   m_Layer: 5
   m_Name: Outfit
   m_TagString: Untagged
@@ -75,6 +76,22 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!111 &2871411121885654478
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6022850716931569917}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 7400000, guid: 0c101b2539ab4ae44a48998d83e0fee3, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: 0c101b2539ab4ae44a48998d83e0fee3, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0
 --- !u!1 &6022850717798724767
 GameObject:
   m_ObjectHideFlags: 0

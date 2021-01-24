@@ -64,7 +64,20 @@ public class NetworkManagement : NetworkManager
         public string nickname;
     }
 
+    public struct OutfitAdd : NetworkMessage
+    {
+        public int id;
+    }
 
+    public struct OutfitAddResult : NetworkMessage { }
+
+    public struct PlayerUpdateRequest : NetworkMessage { }
+
+    public struct PlayerUpdateResponse : NetworkMessage
+    {
+        public PlayerInfo info;
+    }
+    public struct PackagePacket : NetworkMessage { }
 
     public struct OutfitRequest : NetworkMessage
     {
@@ -78,6 +91,8 @@ public class NetworkManagement : NetworkManager
     private GameObject tempObj;
 
     public PlayerInfo playerInfo;
+
+    private GameDB gameDB;
 
     #region Unity Callbacks
 
@@ -94,6 +109,7 @@ public override void Awake()
 {
     base.Awake();
         DBManager = FindObjectOfType<FirebaseManager>();
+        gameDB = FindObjectOfType<GameDB>();
 }
 
 /// <summary>
@@ -105,7 +121,10 @@ public override void Start()
     base.Start();
         StartClient();
         DBManager = FindObjectOfType<FirebaseManager>();
+        gameDB = FindObjectOfType<GameDB>();
     }
+
+    
 
 
 
@@ -232,11 +251,11 @@ public override void OnServerAddPlayer(NetworkConnection conn)
 /// <param name="conn">Connection from client.</param>
 public override void OnServerDisconnect(NetworkConnection conn)
 {
-        Transform playerObj = conn.identity.transform;
-        Player p = playerPrefab.GetComponent<Player>();
-        StartCoroutine(DBManager.UpdatePosition(playerObj.position));
-    base.OnServerDisconnect(conn);
+        Player p = conn.identity.GetComponent<Player>();
+        StartCoroutine(DBManager.UpdatePlayerInfo(p));
         Debug.Log("Player " + p.nickname + " disconnected " + conn.address);
+        base.OnServerDisconnect(conn);
+        
 
 }
 
@@ -268,8 +287,13 @@ public override void OnClientConnect(NetworkConnection conn)
 /// <param name="conn">Connection to the server.</param>
 public override void OnClientDisconnect(NetworkConnection conn)
 {
+        Destroy(DBManager.gameObject);
+        Destroy(gameDB.gameObject);
+
         StartCoroutine(DisconnectLog("Server has disconnected"));
-    base.OnClientDisconnect(conn);
+        StartClient();
+        base.OnClientDisconnect(conn);
+        Destroy(this.gameObject);
 }
 
     private IEnumerator DisconnectLog(string msg)
@@ -320,6 +344,8 @@ public override void OnStartServer() {
         NetworkServer.RegisterHandler<OutfitRequest>(OnPlayerChangeOutfit);
         NetworkServer.RegisterHandler<ClientReadyForPlayer>(OnClientReadyToSpawn);
         NetworkServer.RegisterHandler<NicknameRequest>(OnNicknameRequest);
+        NetworkServer.RegisterHandler<OutfitAdd>(OnOutfitAdd);
+        NetworkServer.RegisterHandler<PlayerUpdateRequest>(OnPlayerUpdateRequest);
         Debug.Log("Initializing server map");
         SceneManager.LoadSceneAsync("MainGame");
     }
@@ -331,6 +357,9 @@ public override void OnStartClient() {
         NetworkClient.RegisterHandler<LoginResponse>(OnLoginResponse);
         NetworkClient.RegisterHandler<PlayerOutfitResult>(OnOutfitResult);
         NetworkClient.RegisterHandler<NicknameResponse>(OnNicknameResponse);
+        NetworkClient.RegisterHandler<OutfitAddResult>(OnOutfitAddResult);
+        NetworkClient.RegisterHandler<PackagePacket>(OnPackagePacket);
+        NetworkClient.RegisterHandler<PlayerUpdateResponse>(OnPlayerUpdateResponse);
     }
 
 /// <summary>
@@ -460,6 +489,10 @@ public override void OnStopClient() { }
                 yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
                 DBTask2 = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("z").SetValueAsync(0);
                 yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                DBTask2 = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("experience").SetValueAsync(0);
+                yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                DBTask2 = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("level").SetValueAsync(1);
+                yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
                 PlayerInfo pInfo = new PlayerInfo
                 {
                     nickname = "",
@@ -486,6 +519,8 @@ public override void OnStopClient() { }
                     x = float.Parse(snapshot.Child("x").Value.ToString()),
                     y = float.Parse(snapshot.Child("y").Value.ToString()),
                     z = float.Parse(snapshot.Child("z").Value.ToString()),
+                    experience = int.Parse(snapshot.Child("experience").Value.ToString()),
+                    level = int.Parse(snapshot.Child("level").Value.ToString()),
                     username = DBManager.User.Email,
                     userId = DBManager.User.UserId
                 };
@@ -554,11 +589,13 @@ public override void OnStopClient() { }
         p.currentOutfit = info.currentOutfit;
         p.userId = info.userId;
         p.info = info;
+        p.outfits = new List<int>(System.Array.ConvertAll(info.outfits.Split(','), int.Parse));
 
         
         agent.enabled = true;
 
         tempObj = obj;
+        playerInfo = info;
         
 
         
@@ -695,6 +732,80 @@ public override void OnStopClient() { }
         }
     }
 
+    public void OnOutfitAdd(NetworkConnection conn, OutfitAdd message)
+    {
+        string playerOutfits = playerInfo.outfits;
+        string newPlayerOutfits = playerOutfits + "," + message.id;
+        StartCoroutine(OutfitAddEnum(newPlayerOutfits, message.id, conn));
+    }
+
+    IEnumerator OutfitAddEnum(string newoutfits, int newOutfit, NetworkConnection conn)
+    {
+        conn.identity.GetComponent<Player>().info.outfits = newoutfits;
+        var DBTask = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("outfits").SetValueAsync(newoutfits);
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        if (DBTask.Exception != null)
+        {
+            Debug.Log(DBTask.Exception);
+        }
+        else
+        {
+            if (playerInfo.currentOutfit == 0)
+            {
+                DBTask = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("currentOutfit").SetValueAsync(newOutfit);
+                yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+                if (DBTask.Exception != null)
+                {
+                    Debug.Log(DBTask.Exception);
+                }
+                playerInfo.currentOutfit = newOutfit;
+                conn.identity.GetComponent<Player>().currentOutfit = newOutfit;
+                conn.identity.GetComponent<Player>().info.currentOutfit = newOutfit;
+            }
+            conn.identity.GetComponent<Player>().info.outfits = newoutfits;
+            conn.identity.GetComponent<Player>().outfits.Add(newOutfit);
+            playerInfo.currentOutfit = newOutfit;
+            playerInfo.outfits = newoutfits;
+            conn.Send(new OutfitAddResult { });
+        }
+    }
+
+    public void OnOutfitAddResult(NetworkConnection conn, OutfitAddResult message)
+    {
+
+    }
+
+    public void AddPlayerOutfitStart(int id)
+    {
+        NetworkClient.Send(new OutfitAdd { id = id });
+        SceneManager.LoadSceneAsync("MainGame");
+        NetworkClient.Send(new NetworkManagement.ClientReadyForPlayer());
+    }
+
+    public void AddPlayerOutfit(int id)
+    {
+        NetworkClient.Send(new OutfitAdd { id = id });
+        
+    }
+
+    public void OnPackagePacket(NetworkConnection conn, PackagePacket message)
+    {
+        FindObjectOfType<MainUI>().ShowPackage();
+    }
+
+    public void OnPlayerUpdateRequest(NetworkConnection conn, PlayerUpdateRequest message)
+    {
+
+        PlayerInfo info = conn.identity.GetComponent<Player>().info;
+        DBManager.UpdatePlayerData(info);
+        conn.Send(new PlayerUpdateResponse { });
+    }
+
+    public void OnPlayerUpdateResponse(NetworkConnection conn, PlayerUpdateResponse message)
+    {
+        Debug.Log("Saved player data");
+    }
 
 
 }

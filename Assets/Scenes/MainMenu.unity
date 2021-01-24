@@ -1386,6 +1386,18 @@ MonoBehaviour:
   spawnPrefabs: []
   DBManager: {fileID: 1166258524}
   defaultStart: {fileID: 0}
+  playerInfo:
+    id: 0
+    username: 
+    nickname: 
+    currentOutfit: 0
+    outfits: 
+    x: 0
+    y: 0
+    z: 0
+    userId: 
+    experience: 0
+    level: 0
 --- !u!114 &594930808
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1465,6 +1477,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: ac22fc3e986eb5648a171dc14a1544ff, type: 3}
   - {fileID: 21300000, guid: 24e437be3137ba742993fbe7a4fa54a4, type: 3}
   DBManager: {fileID: 1166258524}
+  network: {fileID: 594930807}
+  expRate: 1
 --- !u!4 &640792997
 Transform:
   m_ObjectHideFlags: 0
@@ -2410,6 +2424,8 @@ MonoBehaviour:
     y: 0
     z: 0
     userId: 
+    experience: 0
+    level: 0
 --- !u!4 &1166258525
 Transform:
   m_ObjectHideFlags: 0

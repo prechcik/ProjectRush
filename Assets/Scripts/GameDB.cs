@@ -2,6 +2,7 @@ using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -14,6 +15,9 @@ public class GameDB : MonoBehaviour
     private List<int> randList = new List<int>();
 
     public FirebaseManager DBManager;
+    public NetworkManagement network;
+
+    public float expRate = 3 / 2;
 
 
     // Start is called before the first frame update
@@ -22,14 +26,14 @@ public class GameDB : MonoBehaviour
 
         DontDestroyOnLoad(this.gameObject);
         DBManager = FindObjectOfType<FirebaseManager>();
-
-
+        network = FindObjectOfType<NetworkManagement>();
     }
 
     private void Awake()
     {
         DontDestroyOnLoad(this.gameObject);
         DBManager = FindObjectOfType<FirebaseManager>();
+        network = FindObjectOfType<NetworkManagement>();
     }
 
     // Update is called once per frame
@@ -41,14 +45,21 @@ public class GameDB : MonoBehaviour
     public List<int> GetRandomOutfits(int amount)
     {
         randList = new List<int>();
-        
-        while(randList.Count < amount)
+        List<int> playerOutfits = NetworkClient.connection.identity.GetComponent<Player>().outfits;
+        List<int> allOutfits = new List<int>();
+        foreach (GameObject g in outfitList)
         {
-            int rand = UnityEngine.Random.Range(1, outfitList.Count);
-            if (!randList.Contains(rand))
-            {
-                randList.Add(rand);
-            }
+            allOutfits.Add(g.GetComponent<Outfit>().id);
+        }
+        List<int> possibleOutfits = allOutfits.Except(playerOutfits).ToList();
+        
+        int possibleRewards = possibleOutfits.Count;
+        if (possibleRewards > amount) { possibleRewards = amount; }
+        List<int> shuffledRewards = possibleOutfits.OrderBy(item => Guid.NewGuid()).ToList();
+
+        for (int i = 0; i < possibleRewards; i++)
+        {
+            randList.Add(shuffledRewards.ElementAt(i));
         }
         return randList;
     }
@@ -70,4 +81,6 @@ public class GameDB : MonoBehaviour
     {
         return packageRarities[index];
     }
+
+
 }

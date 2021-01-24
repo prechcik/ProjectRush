@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class StartPackageScreen : MonoBehaviour
@@ -24,12 +25,12 @@ public class StartPackageScreen : MonoBehaviour
     public void GetRandomPackages()
     {
         List<int> randomOutfits = gameDB.GetRandomOutfits(5);
-        Debug.Log("Package rewards: " + randomOutfits[0] + "," + randomOutfits[1] + "," + randomOutfits[2] + "," + randomOutfits[3] + "," + randomOutfits[4]);
-
+        
         StartCoroutine(RevealCards(randomOutfits.ToArray()));
 
 
     }
+
 
 
     IEnumerator RevealCards(int[] ids)
@@ -37,13 +38,19 @@ public class StartPackageScreen : MonoBehaviour
         PackageScreen.SetActive(false);
         ContentBG.SetActive(true);
         List<Outfit> outfitList = new List<Outfit>();
-        for(int i = 0; i < ids.Length; i++)
+        for (int i = 0; i < ids.Length; i++)
         {
             outfitList.Add(gameDB.GetOutfit(ids[i]));
             GameObject CardObj = Instantiate(CardPrefab, ContentScreen.transform);
             OutfitCard card = CardObj.GetComponent<OutfitCard>();
             int outfitId = ids[i];
-            card.cardButton.onClick.AddListener(delegate { gameDB.DBManager.AddOutfit(outfitId); Debug.Log("Sending outfit id request [" + outfitId + "] for player "); });
+            if (SceneManager.GetActiveScene().name == "MainMenu")
+            {
+                card.cardButton.onClick.AddListener(delegate { gameDB.network.AddPlayerOutfitStart(outfitId); Debug.Log("Sending outfit id request [" + outfitId + "] for player "); });
+            } else if (SceneManager.GetActiveScene().name == "MainGame")
+            {
+                card.cardButton.onClick.AddListener(delegate {  gameDB.network.AddPlayerOutfit(outfitId); Debug.Log("Sending outfit id request [" + outfitId + "] for player "); this.gameObject.SetActive(false); });
+            }
             card.cardOutfit.sprite = outfitList[i].icon;
             card.cardRarity.sprite = gameDB.GetRaritySprite(outfitList[i].rarity);
             card.cardAnimator.SetTrigger("Reveal");
@@ -57,12 +64,6 @@ public class StartPackageScreen : MonoBehaviour
     }
 
 
-    public void ShowPackageScreen()
-    {
-        UIManager.ShowPackage();
-        PackageScreen.SetActive(true);
-        ContentBG.SetActive(false);
-    }
 
 
     
