@@ -62,12 +62,17 @@ public class FirebaseManager : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
     }
 
+    private void OnApplicationQuit()
+    {
+        
+    }
+
     private void InitializeFirebase()
     {
         Debug.Log("Setting up Firebase Auth");
         //Set the authentication instance object
         auth = FirebaseAuth.DefaultInstance;
-        FirebaseDatabase.DefaultInstance.SetPersistenceEnabled(false);
+        //FirebaseDatabase.DefaultInstance.SetPersistenceEnabled(false);
         DBRefrence = FirebaseDatabase.DefaultInstance.RootReference;
         
     }
@@ -246,17 +251,17 @@ public class FirebaseManager : MonoBehaviour
 
     public IEnumerator UpdatePlayerInfo(Player p)
     {
-        var DBTask = DBRefrence.Child("users").Child(User.UserId).Child("x").SetValueAsync(p.lastPos.x);
+        var DBTask = DBRefrence.Child("users").Child(p.userId).Child("x").SetValueAsync(p.playerPosition.x);
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
-        DBTask = DBRefrence.Child("users").Child(User.UserId).Child("y").SetValueAsync(p.lastPos.y);
+        DBTask = DBRefrence.Child("users").Child(p.userId).Child("y").SetValueAsync(p.playerPosition.y);
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
-        DBTask = DBRefrence.Child("users").Child(User.UserId).Child("z").SetValueAsync(p.lastPos.z);
+        DBTask = DBRefrence.Child("users").Child(p.userId).Child("z").SetValueAsync(p.playerPosition.z);
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
-        DBTask = DBRefrence.Child("users").Child(User.UserId).Child("currentOutfit").SetValueAsync(p.activeOutfit);
+        DBTask = DBRefrence.Child("users").Child(p.userId).Child("currentOutfit").SetValueAsync(p.currentOutfit);
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
-        DBTask = DBRefrence.Child("users").Child(User.UserId).Child("experience").SetValueAsync(p.currentExp);
+        DBTask = DBRefrence.Child("users").Child(p.userId).Child("experience").SetValueAsync(p.currentExp);
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
-        DBTask = DBRefrence.Child("users").Child(User.UserId).Child("level").SetValueAsync(p.currentLevel);
+        DBTask = DBRefrence.Child("users").Child(p.userId).Child("level").SetValueAsync(p.currentLevel);
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
     }
 

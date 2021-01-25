@@ -19,6 +19,7 @@ public class MainUI : MonoBehaviour
     public Transform messageContainer;
     public InputField chatInputField;
     public Button chatButton;
+    public GameObject chatCloudPrefab;
     // Start is called before the first frame update
 
 

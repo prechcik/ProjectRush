@@ -49,6 +49,20 @@ public class ChatBox : NetworkBehaviour
         GameObject message = Instantiate(ui.messagePrefab, ui.messageContainer);
         ChatMessage sc = message.GetComponent<ChatMessage>();
         sc.MessageText.text = "<b>" + msg.sender + "</b>: " + msg.message;
+        GameObject messageCloud = Instantiate(ui.chatCloudPrefab, ui.transform);
+        
+        Player[] players = GameObject.FindObjectsOfType<Player>();
+        foreach (Player p in players)
+        {
+            if (p.nickname == msg.sender)
+            {
+                ChatCloud cloudScript = messageCloud.GetComponent<ChatCloud>();
+                cloudScript.cloudText.text = msg.message;
+                cloudScript.target = p.transform;
+
+            }
+        }
+        
     }
 
     

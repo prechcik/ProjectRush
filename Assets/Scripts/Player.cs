@@ -29,6 +29,8 @@ public class Player : NetworkBehaviour
     [SyncVar]
     public int currentLevel;
 
+    
+
     private GameDB gameDB;
     private MainUI mainUI;
 
@@ -44,7 +46,7 @@ public class Player : NetworkBehaviour
 
     public Animator playerAnimator;
 
-    private Vector3 lastLocalPos;
+    public Vector3 lastLocalPos;
 
     private MainUI ui;
 
@@ -76,7 +78,7 @@ public class Player : NetworkBehaviour
             ChangeOutfit(currentOutfit);
             
         }
-        if (isLocalPlayer)
+        if (isLocalPlayer && isClient)
         {
             UpdateRot(transform.rotation);
             UpdatePos(transform.position);
@@ -84,9 +86,9 @@ public class Player : NetworkBehaviour
             HandleExperience();
             UpdateExpBar();
         }
-        else
+        else if (!isLocalPlayer && isClient)
         {
-            float tempSpeed = Mathf.Clamp(Time.deltaTime * agent.angularSpeed, 0f, 0.99f);
+            float tempSpeed = Mathf.Clamp(Time.deltaTime * agent.speed, 0f, 0.99f);
             transform.rotation = Quaternion.Lerp(transform.rotation, playerRotation, tempSpeed);
             transform.position = Vector3.Lerp(transform.position, playerPosition, Time.deltaTime * agent.speed);
         }

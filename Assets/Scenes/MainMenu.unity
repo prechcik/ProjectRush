@@ -1472,6 +1472,15 @@ MonoBehaviour:
   - {fileID: 100104, guid: de5eab967c5239c45b75177c02c52b8a, type: 3}
   - {fileID: 100008, guid: a9a1333964c1bd94d855c53081841cb1, type: 3}
   - {fileID: 1767663768970106, guid: ca9fda2f4d77c4d4f88d4ed8b939f69b, type: 3}
+  - {fileID: 1136893558532244269, guid: 46029399efbac8141aa9ea1ec1729f50, type: 3}
+  - {fileID: 1475339451434976, guid: bde7b389ddf0f884bb02f5a01b9798b4, type: 3}
+  - {fileID: 6667349562693488409, guid: 25dca67001422c04d8a535a7cd2006c4, type: 3}
+  - {fileID: 6252356961377389083, guid: 2db03e7c8a8135146b280e5da7e0289c, type: 3}
+  - {fileID: 7478225697116208144, guid: 6fb37f825ee63264b9c2600bf1a52006, type: 3}
+  - {fileID: 7447163605589988728, guid: 907fd825e3988774caab4234b943bf44, type: 3}
+  - {fileID: 2067522734183174338, guid: 5df71d4a96dd76e4183a5512f66ae628, type: 3}
+  - {fileID: 8619338778009079851, guid: 47a3741b253f088469eedd6d403dd89a, type: 3}
+  - {fileID: 856601670117699726, guid: b14953694d54eea4eb66f453e525024c, type: 3}
   packageRarities:
   - {fileID: 21300000, guid: 543cacf9550ed8640b7323ba627174b6, type: 3}
   - {fileID: 21300000, guid: ac22fc3e986eb5648a171dc14a1544ff, type: 3}

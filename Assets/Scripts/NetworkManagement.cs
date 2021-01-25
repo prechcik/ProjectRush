@@ -84,6 +84,7 @@ public class NetworkManagement : NetworkManager
         public int outfitid;
     }
 
+
     public FirebaseManager DBManager;
 
     public NetworkStartPosition defaultStart;
@@ -162,6 +163,7 @@ public override void ConfigureServerFrameRate()
 /// </summary>
 public override void OnApplicationQuit()
 {
+        DBManager.auth.SignOut();
     base.OnApplicationQuit();
 }
 
@@ -241,6 +243,7 @@ public override void OnServerReady(NetworkConnection conn)
 /// <param name="conn">Connection from client.</param>
 public override void OnServerAddPlayer(NetworkConnection conn)
 {
+        
     base.OnServerAddPlayer(conn);
 }
 
@@ -256,7 +259,7 @@ public override void OnServerDisconnect(NetworkConnection conn)
         Debug.Log("Player " + p.nickname + " disconnected " + conn.address);
         base.OnServerDisconnect(conn);
         
-
+         
 }
 
 /// <summary>
@@ -289,9 +292,10 @@ public override void OnClientDisconnect(NetworkConnection conn)
 {
         Destroy(DBManager.gameObject);
         Destroy(gameDB.gameObject);
-
+        
+        //Player p = conn.identity.GetComponent<Player>();
+        //StartCoroutine(DBManager.UpdatePlayerInfo(p));
         StartCoroutine(DisconnectLog("Server has disconnected"));
-        StartClient();
         base.OnClientDisconnect(conn);
         Destroy(this.gameObject);
 }
@@ -468,12 +472,14 @@ public override void OnStopClient() { }
             //User is now logged in
             //Now get the result
             DBManager.User = LoginTask.Result;
-            //Debug.LogFormat("Firebase: User signed in successfully: {0} ({1})", DBManager.User.DisplayName, DBManager.User.Email);
+            Debug.LogFormat("Firebase: User signed in successfully: {0} ({1})", DBManager.User.DisplayName, DBManager.User.Email);
+
 
             var DBTask = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).GetValueAsync();
 
             yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
             
+
 
             if (DBTask.Exception != null)
             {
@@ -544,6 +550,7 @@ public override void OnStopClient() { }
 
     void OnLoginResponse(NetworkConnection conn, LoginResponse message)
     {
+        if (!NetworkClient.isConnected) { NetworkClient.Connect(networkAddress); }
         if (!ClientScene.ready) ClientScene.Ready(conn);
         Debug.Log("Received login response from server: " + message.result);
         if (message.result == "OK")
@@ -576,7 +583,7 @@ public override void OnStopClient() { }
 
     void OnPlayerInfo(NetworkConnection conn, PlayerInfo info)
     {
-        if (playerInfo.nickname == info.nickname) { return; }
+        
         LoginResponse r = new LoginResponse
         {
             result = "OK",
@@ -586,17 +593,17 @@ public override void OnStopClient() { }
         Vector3 spawnPoint = new Vector3(info.x, info.y, info.z);
         bool isSpawnOnMesh = IsAgentOnNavMesh(spawnPoint);
         NavMeshHit hit;
-        NavMesh.SamplePosition(spawnPoint, out hit, 2f, NavMesh.AllAreas);
+        NavMesh.SamplePosition(spawnPoint, out hit, 100f, NavMesh.AllAreas);
         if (hit.hit)
         {
             spawnPoint = hit.position;
             isSpawnOnMesh = IsAgentOnNavMesh(spawnPoint);
         }
-        GameObject obj = GameObject.Instantiate(playerPrefab, new Vector3(info.x,info.y,info.z), Quaternion.identity);
+        GameObject obj = GameObject.Instantiate(playerPrefab, spawnPoint, Quaternion.identity);
         
         //Debug.Log("Spawning " + info.nickname + " at (" + info.x + "," + info.y + "," + info.z + ")");
         NavMeshAgent agent = obj.GetComponent<NavMeshAgent>();
-        agent.Warp(new Vector3(info.x, info.y, info.z));
+        agent.Warp(spawnPoint);
         agent.enabled = false;
         obj.name = info.nickname;
         Player p = obj.GetComponent<Player>();
@@ -606,7 +613,8 @@ public override void OnStopClient() { }
         p.userId = info.userId;
         p.info = info;
         p.outfits = new List<int>(System.Array.ConvertAll(info.outfits.Split(','), int.Parse));
-
+        p.lastPos = spawnPoint;
+        p.lastLocalPos = spawnPoint;
         
         agent.enabled = true;
 
@@ -675,7 +683,7 @@ public override void OnStopClient() { }
         {
             string res = DBTask.Result.Value.ToString();
             int[] outfits = System.Array.ConvertAll(res.Split(','), int.Parse);
-            p.outfits = new List<int>(outfits);
+            conn.identity.GetComponent<Player>().outfits = new List<int>(outfits);
             PlayerOutfitResult msg = new PlayerOutfitResult
             {
                 outfits = outfits
@@ -688,6 +696,7 @@ public override void OnStopClient() { }
     public void OnPlayerChangeOutfit(NetworkConnection conn, OutfitRequest message)
     {
         conn.identity.GetComponent<Player>().currentOutfit = message.outfitid;
+
         //Debug.Log("Player " + conn.identity.GetComponent<Player>().nickname + " has changed outfit to id " + message.outfitid);
     }
 
@@ -758,7 +767,7 @@ public override void OnStopClient() { }
     IEnumerator OutfitAddEnum(string newoutfits, int newOutfit, NetworkConnection conn)
     {
         conn.identity.GetComponent<Player>().info.outfits = newoutfits;
-        var DBTask = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("outfits").SetValueAsync(newoutfits);
+        var DBTask = DBManager.DBRefrence.Child("users").Child(conn.identity.GetComponent<Player>().userId).Child("outfits").SetValueAsync(newoutfits);
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
 
         if (DBTask.Exception != null)
