@@ -1006,16 +1006,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 0
-    m_Right: 0
+    m_Left: 10
+    m_Right: 5
     m_Top: 0
-    m_Bottom: 0
+    m_Bottom: 10
   m_ChildAlignment: 6
   m_Spacing: 0
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
@@ -1468,7 +1468,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &758996535
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2856,7 +2856,7 @@ MonoBehaviour:
   expPanelText: {fileID: 820726621}
   packageUI: {fileID: 332696669}
   ChatBox: {fileID: 1378922354}
-  messagePrefab: {fileID: 1159663517773975305, guid: 795ec8851a789c34fbc1a6f9f8b7151f, type: 3}
+  messagePrefab: {fileID: 2470289350625565803, guid: 795ec8851a789c34fbc1a6f9f8b7151f, type: 3}
   messageContainer: {fileID: 519102125}
   chatInputField: {fileID: 1392332794}
   chatButton: {fileID: 232795560}

@@ -221,7 +221,7 @@ public override void OnClientSceneChanged(NetworkConnection conn)
 /// </summary>
 /// <param name="conn">Connection from client.</param>
 public override void OnServerConnect(NetworkConnection conn) {
-        Debug.Log("Player connected " + conn.address);
+        //Debug.Log("Player connected " + conn.address);
     }
 
 /// <summary>
@@ -347,7 +347,12 @@ public override void OnStartServer() {
         NetworkServer.RegisterHandler<OutfitAdd>(OnOutfitAdd);
         NetworkServer.RegisterHandler<PlayerUpdateRequest>(OnPlayerUpdateRequest);
         Debug.Log("Initializing server map");
-        SceneManager.LoadSceneAsync("MainGame");
+        StartCoroutine(LoadServerScene());
+    }
+
+    IEnumerator LoadServerScene()
+    {
+        yield return SceneManager.LoadSceneAsync("MainGame");
     }
 
 /// <summary>
@@ -414,7 +419,7 @@ public override void OnStopClient() { }
 
     void OnLoginRequest(NetworkConnection conn, LoginRequest message)
     {
-        Debug.Log("Connection " + conn.address + " is requesting login for username " + message.email);
+        //Debug.Log("Connection " + conn.address + " is requesting login for username " + message.email);
         StartCoroutine(LoginEnum(message, conn));
     }
 
@@ -463,7 +468,7 @@ public override void OnStopClient() { }
             //User is now logged in
             //Now get the result
             DBManager.User = LoginTask.Result;
-            Debug.LogFormat("Firebase: User signed in successfully: {0} ({1})", DBManager.User.DisplayName, DBManager.User.Email);
+            //Debug.LogFormat("Firebase: User signed in successfully: {0} ({1})", DBManager.User.DisplayName, DBManager.User.Email);
 
             var DBTask = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).GetValueAsync();
 
@@ -476,7 +481,7 @@ public override void OnStopClient() { }
             }
             else if (DBTask.Result.Value == null)
             {
-                Debug.Log("User DB is empty, creating sample data");
+                //Debug.Log("User DB is empty, creating sample data");
                 var DBTask2 = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("nickname").SetValueAsync("");
                 yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
                 DBTask2 = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("currentOutfit").SetValueAsync(0);
@@ -524,7 +529,7 @@ public override void OnStopClient() { }
                     username = DBManager.User.Email,
                     userId = DBManager.User.UserId
                 };
-                Debug.Log("Loaded user data - " + pInfo.nickname);
+                //Debug.Log("Loaded user data - " + pInfo.nickname);
                 DBManager.pInfo = pInfo;
                 OnPlayerInfo(conn, pInfo);
             }
@@ -539,6 +544,7 @@ public override void OnStopClient() { }
 
     void OnLoginResponse(NetworkConnection conn, LoginResponse message)
     {
+        if (!ClientScene.ready) ClientScene.Ready(conn);
         Debug.Log("Received login response from server: " + message.result);
         if (message.result == "OK")
         {
@@ -570,15 +576,25 @@ public override void OnStopClient() { }
 
     void OnPlayerInfo(NetworkConnection conn, PlayerInfo info)
     {
+        if (playerInfo.nickname == info.nickname) { return; }
         LoginResponse r = new LoginResponse
         {
             result = "OK",
             info = info
         };
         conn.Send(r);
-
+        Vector3 spawnPoint = new Vector3(info.x, info.y, info.z);
+        bool isSpawnOnMesh = IsAgentOnNavMesh(spawnPoint);
+        NavMeshHit hit;
+        NavMesh.SamplePosition(spawnPoint, out hit, 2f, NavMesh.AllAreas);
+        if (hit.hit)
+        {
+            spawnPoint = hit.position;
+            isSpawnOnMesh = IsAgentOnNavMesh(spawnPoint);
+        }
         GameObject obj = GameObject.Instantiate(playerPrefab, new Vector3(info.x,info.y,info.z), Quaternion.identity);
-        Debug.Log("Spawning " + info.nickname + " at (" + info.x + "," + info.y + "," + info.z + ")");
+        
+        //Debug.Log("Spawning " + info.nickname + " at (" + info.x + "," + info.y + "," + info.z + ")");
         NavMeshAgent agent = obj.GetComponent<NavMeshAgent>();
         agent.Warp(new Vector3(info.x, info.y, info.z));
         agent.enabled = false;
@@ -635,11 +651,11 @@ public override void OnStopClient() { }
 
     public void OnOutfitResult(NetworkConnection conn, PlayerOutfitResult message)
     {
-        Debug.Log("Player outfits: ");
-        foreach (int outfit in message.outfits)
-        {
-            Debug.Log("Outfit id: " + outfit);
-        }
+        //Debug.Log("Player outfits: ");
+        //foreach (int outfit in message.outfits)
+        //{
+            //Debug.Log("Outfit id: " + outfit);
+        //}
         OutfitPanel panel = FindObjectOfType<OutfitPanel>();
         panel.PopulateIcons(new List<int>(message.outfits));
     }
@@ -648,8 +664,8 @@ public override void OnStopClient() { }
     IEnumerator GetOutfits(NetworkConnection conn)
     {
         Player p = conn.identity.GetComponent<Player>();
-        Debug.Log("Received outfit list request for player " + p.nickname);
-        var DBTask = DBManager.DBRefrence.Child("users").Child(DBManager.User.UserId).Child("outfits").GetValueAsync();
+        //Debug.Log("Received outfit list request for player " + p.nickname);
+        var DBTask = DBManager.DBRefrence.Child("users").Child(p.userId).Child("outfits").GetValueAsync();
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
         if (DBTask.Exception != null)
         {
@@ -672,7 +688,7 @@ public override void OnStopClient() { }
     public void OnPlayerChangeOutfit(NetworkConnection conn, OutfitRequest message)
     {
         conn.identity.GetComponent<Player>().currentOutfit = message.outfitid;
-        Debug.Log("Player " + conn.identity.GetComponent<Player>().nickname + " has changed outfit to id " + message.outfitid);
+        //Debug.Log("Player " + conn.identity.GetComponent<Player>().nickname + " has changed outfit to id " + message.outfitid);
     }
 
     public void NicknameBtn()
@@ -709,7 +725,7 @@ public override void OnStopClient() { }
     {
         if (message.response == "OK")
         {
-            Debug.Log("Username was free");
+            //Debug.Log("Username was free");
             UIManager.ShowPackage();
         } else
         {
@@ -805,6 +821,27 @@ public override void OnStopClient() { }
     public void OnPlayerUpdateResponse(NetworkConnection conn, PlayerUpdateResponse message)
     {
         Debug.Log("Saved player data");
+    }
+
+
+    public bool IsAgentOnNavMesh(Vector3 agentObject)
+    {
+        Vector3 agentPosition = agentObject;
+        NavMeshHit hit;
+
+        // Check for nearest point on navmesh to agent, within onMeshThreshold
+        if (NavMesh.SamplePosition(agentPosition, out hit, 2f, NavMesh.AllAreas))
+        {
+            // Check if the positions are vertically aligned
+            if (Mathf.Approximately(agentPosition.x, hit.position.x)
+                && Mathf.Approximately(agentPosition.z, hit.position.z))
+            {
+                // Lastly, check if object is below navmesh
+                return agentPosition.y >= hit.position.y;
+            }
+        }
+
+        return false;
     }
 
 

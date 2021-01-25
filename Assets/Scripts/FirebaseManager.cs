@@ -67,7 +67,9 @@ public class FirebaseManager : MonoBehaviour
         Debug.Log("Setting up Firebase Auth");
         //Set the authentication instance object
         auth = FirebaseAuth.DefaultInstance;
+        FirebaseDatabase.DefaultInstance.SetPersistenceEnabled(false);
         DBRefrence = FirebaseDatabase.DefaultInstance.RootReference;
+        
     }
 
     public void LoginButton()

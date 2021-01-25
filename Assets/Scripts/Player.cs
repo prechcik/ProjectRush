@@ -44,7 +44,11 @@ public class Player : NetworkBehaviour
 
     public Animator playerAnimator;
 
+    private Vector3 lastLocalPos;
+
     private MainUI ui;
+
+    
 
     // Start is called before the first frame update
     void Start()
@@ -82,20 +86,22 @@ public class Player : NetworkBehaviour
         }
         else
         {
-            transform.rotation = Quaternion.Lerp(transform.rotation, playerRotation, Time.deltaTime * agent.angularSpeed);
+            float tempSpeed = Mathf.Clamp(Time.deltaTime * agent.angularSpeed, 0f, 0.99f);
+            transform.rotation = Quaternion.Lerp(transform.rotation, playerRotation, tempSpeed);
             transform.position = Vector3.Lerp(transform.position, playerPosition, Time.deltaTime * agent.speed);
         }
-        speedMagnitude = (float)(this.agent.transform.position - lastPos).magnitude;
+        speedMagnitude = (float)(this.transform.position - lastLocalPos).magnitude;
         speed = (float)((speedMagnitude / Time.deltaTime) / this.agent.speed);
         if (playerAnimator != null)
         {
             playerAnimator.SetFloat("speed", this.speed);
         }
+        lastLocalPos = this.transform.position;
     }
 
     public void ChangeOutfit(int newOufit)
     {
-        foreach(Transform t in modelContainer.transform)
+        foreach(Transform t in netIdentity.GetComponent<Player>().modelContainer.transform)
         {
             Destroy(t.gameObject);
         }
@@ -103,10 +109,10 @@ public class Player : NetworkBehaviour
             Outfit ou = o.GetComponent<Outfit>();
             if (ou != null && ou.id == newOufit)
             {
-                GameObject playerModel = Instantiate(o, o.transform.localPosition, transform.rotation, modelContainer.transform);
+                GameObject playerModel = Instantiate(o, o.transform.localPosition, netIdentity.GetComponent<Player>().transform.rotation, netIdentity.GetComponent<Player>().modelContainer.transform);
                 playerModel.transform.localPosition = o.transform.localPosition;
-                activeOutfit = currentOutfit;
-                playerAnimator = playerModel.GetComponent<Animator>();
+                netIdentity.GetComponent<Player>().activeOutfit = currentOutfit;
+                netIdentity.GetComponent<Player>().playerAnimator = playerModel.GetComponent<Animator>();
             }
         }
     }
@@ -184,12 +190,36 @@ public class Player : NetworkBehaviour
     [Client]
     public void Send()
     {
-        if (string.IsNullOrWhiteSpace(ui.chatInputField.text)) { return; }
-        if (ui.chatInputField.text.Length > 20)
+        if (string.IsNullOrWhiteSpace(netIdentity.GetComponent<Player>().ui.chatInputField.text)) { return; }
+        if (netIdentity.GetComponent<Player>().ui.chatInputField.text.Length > 50)
         {
-            ui.chatInputField.text = ui.chatInputField.text.Substring(0, 20);
+            netIdentity.GetComponent<Player>().ui.chatInputField.text = netIdentity.GetComponent<Player>().ui.chatInputField.text.Substring(0, 50);
         }
-        CmdSendMessage(new ChatBox.ChatMsg { sender = nickname, message = ui.chatInputField.text });
+        SendToNearby();
+    }
+
+    public void SendToNearby()
+    {
+        Collider[] nearbyPlayers = Physics.OverlapSphere(netIdentity.transform.position, 3f);
+        List<NetworkIdentity> playersSent = new List<NetworkIdentity>();
+        playersSent.Add(netIdentity);
+        foreach (Collider hitPlayer in nearbyPlayers)
+        {
+                //Debug.Log("Found player " + hitPlayer.GetComponent<Player>().nickname + ", MyIdentity: " + netIdentity.GetComponent<Player>().nickname);
+                if (hitPlayer.GetComponent<NetworkIdentity>() != null && !hitPlayer.GetComponent<NetworkIdentity>() != netIdentity)
+                {
+                    if (!playersSent.Contains(hitPlayer.GetComponent<NetworkIdentity>()))
+                    {
+                        netIdentity.GetComponent<Player>().CmdSendMessage(new ChatBox.ChatMsg { sender = netIdentity.GetComponent<Player>().nickname, message = netIdentity.GetComponent<Player>().ui.chatInputField.text });
+                        playersSent.Add(hitPlayer.GetComponent<NetworkIdentity>());
+                    }
+                }
+        }
+        if (playersSent.Count < 2)
+        {
+            netIdentity.GetComponent<ChatBox>().HandleNewMessage(new ChatBox.ChatMsg { sender = netIdentity.GetComponent<Player>().nickname, message = netIdentity.GetComponent<Player>().ui.chatInputField.text });
+
+        }
     }
 
     [Command]
@@ -201,7 +231,7 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     private void RpcHandleMessage(ChatBox.ChatMsg msg)
     {
-        ChatBox.HandleNewMessage(msg);  
+        netIdentity.GetComponent<ChatBox>().HandleNewMessage(msg);
     }
 
 

@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public class ChatMessage : MonoBehaviour
 {
 
-    public Text SenderText;
     public Text MessageText;
 
 

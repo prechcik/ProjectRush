@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ChatBox : MonoBehaviour
+public class ChatBox : NetworkBehaviour
 {
 
     
@@ -23,8 +23,11 @@ public class ChatBox : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        ui = FindObjectOfType<MainUI>();
-        ui.chatButton.onClick.AddListener(delegate { this.gameObject.GetComponent<Player>().Send(); ui.chatInputField.text = ""; });
+        if (isLocalPlayer)
+        {
+            ui = FindObjectOfType<MainUI>();
+            ui.chatButton.onClick.AddListener(delegate { this.gameObject.GetComponent<Player>().Send(); ui.chatInputField.text = ""; });
+        }
     }
 
     private void Update()
@@ -36,8 +39,8 @@ public class ChatBox : MonoBehaviour
     }
 
 
-
-    public static void HandleNewMessage(ChatMsg msg)
+    [ClientCallback]
+    public void HandleNewMessage(ChatMsg msg)
     {
         if (ui.messageContainer.childCount > 6)
         {
@@ -45,8 +48,7 @@ public class ChatBox : MonoBehaviour
         }
         GameObject message = Instantiate(ui.messagePrefab, ui.messageContainer);
         ChatMessage sc = message.GetComponent<ChatMessage>();
-        sc.SenderText.text = msg.sender + ": ";
-        sc.MessageText.text = msg.message;
+        sc.MessageText.text = "<b>" + msg.sender + "</b>: " + msg.message;
     }
 
     
