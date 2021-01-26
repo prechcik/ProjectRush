@@ -50,7 +50,7 @@ public class NetworkManagement : NetworkManager
 
     public struct ClientReadyForPlayer : NetworkMessage
     {
-
+        public PlayerInfo info;
     }
 
     public struct NicknameRequest : NetworkMessage
@@ -550,11 +550,10 @@ public override void OnStopClient() { }
 
     void OnLoginResponse(NetworkConnection conn, LoginResponse message)
     {
-        if (!NetworkClient.isConnected) { NetworkClient.Connect(networkAddress); }
-        if (!ClientScene.ready) ClientScene.Ready(conn);
         Debug.Log("Received login response from server: " + message.result);
         if (message.result == "OK")
         {
+            
             playerInfo = message.info;
             if (message.info.nickname.Length < 1)
             {
@@ -566,8 +565,8 @@ public override void OnStopClient() { }
             }
             else
             {
-                SceneManager.LoadSceneAsync("MainGame");
-                conn.Send(new ClientReadyForPlayer());
+                StartClient();
+                StartCoroutine(WaitForScene("MainGame", conn, message.info));
             }
         } else
         {
@@ -580,6 +579,16 @@ public override void OnStopClient() { }
         }
     }
 
+    IEnumerator WaitForScene(string sceneName, NetworkConnection conn, PlayerInfo info)
+    {
+        
+        Debug.Log("Loading main game scene");
+        yield return SceneManager.LoadSceneAsync(sceneName).isDone;
+        ClientScene.Ready(conn);
+        Debug.Log("Finished loading, sending ready packet");
+        conn.Send(new ClientReadyForPlayer { info = info });
+    }
+
 
     void OnPlayerInfo(NetworkConnection conn, PlayerInfo info)
     {
@@ -590,45 +599,44 @@ public override void OnStopClient() { }
             info = info
         };
         conn.Send(r);
-        Vector3 spawnPoint = new Vector3(info.x, info.y, info.z);
+        
+        Debug.Log("Player connecting: " + info.nickname);
+    }
+
+    public void OnClientReadyToSpawn(NetworkConnection conn, ClientReadyForPlayer message)
+    {
+        Vector3 spawnPoint = new Vector3(message.info.x, message.info.y, message.info.z);
         bool isSpawnOnMesh = IsAgentOnNavMesh(spawnPoint);
         NavMeshHit hit;
-        NavMesh.SamplePosition(spawnPoint, out hit, 100f, NavMesh.AllAreas);
+        NavMesh.SamplePosition(spawnPoint, out hit, Mathf.Infinity, NavMesh.AllAreas);
         if (hit.hit)
         {
             spawnPoint = hit.position;
             isSpawnOnMesh = IsAgentOnNavMesh(spawnPoint);
         }
         GameObject obj = GameObject.Instantiate(playerPrefab, spawnPoint, Quaternion.identity);
-        
+
         //Debug.Log("Spawning " + info.nickname + " at (" + info.x + "," + info.y + "," + info.z + ")");
         NavMeshAgent agent = obj.GetComponent<NavMeshAgent>();
         agent.Warp(spawnPoint);
         agent.enabled = false;
-        obj.name = info.nickname;
+        obj.name = message.info.nickname;
         Player p = obj.GetComponent<Player>();
 
-        p.nickname = info.nickname;
-        p.currentOutfit = info.currentOutfit;
-        p.userId = info.userId;
-        p.info = info;
-        p.outfits = new List<int>(System.Array.ConvertAll(info.outfits.Split(','), int.Parse));
+        p.nickname = message.info.nickname;
+        p.currentOutfit = message.info.currentOutfit;
+        p.userId = message.info.userId;
+        p.info = message.info;
+        p.outfits = new List<int>(System.Array.ConvertAll(message.info.outfits.Split(','), int.Parse));
         p.lastPos = spawnPoint;
         p.lastLocalPos = spawnPoint;
-        
+
         agent.enabled = true;
 
         tempObj = obj;
-        playerInfo = info;
-        
-
-        
-        Debug.Log("Player connected: " + p.nickname);
-    }
-
-    public void OnClientReadyToSpawn(NetworkConnection conn, ClientReadyForPlayer message)
-    {
+        playerInfo = message.info;
         NetworkServer.AddPlayerForConnection(conn, tempObj);
+        Debug.Log("Spawned player " + p.nickname);
     }
 
     
