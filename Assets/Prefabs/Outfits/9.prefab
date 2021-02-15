@@ -508,7 +508,7 @@ GameObject:
   - component: {fileID: 95777776565643564}
   - component: {fileID: 6066250265385678204}
   m_Layer: 0
-  m_Name: Toon Chick
+  m_Name: 9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -567,7 +567,8 @@ MonoBehaviour:
   outfitName: Chick
   id: 9
   icon: {fileID: 21300000, guid: 273e6708dfcc7aa46a224224f6e21d8c, type: 3}
-  rarity: 0
+  rarity: 4
+  lootPercent: 25
 --- !u!1 &1878532393300130
 GameObject:
   m_ObjectHideFlags: 0

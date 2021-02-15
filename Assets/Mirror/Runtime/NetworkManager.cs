@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using kcp2k;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
@@ -338,7 +339,7 @@ namespace Mirror
         {
             if (NetworkServer.active)
             {
-                logger.LogWarning("Server already started.");
+                logger.LogWarning("[Server] Server already started.");
                 return;
             }
 
@@ -706,7 +707,7 @@ namespace Mirror
             // only set framerate for server build
 #if UNITY_SERVER
             Application.targetFrameRate = serverTickRate;
-            if (logger.logEnabled) logger.Log("Server Tick Rate set to: " + Application.targetFrameRate + " Hz.");
+            if (logger.logEnabled) logger.Log("[Server] Server Tick Rate set to: " + Application.targetFrameRate + " Hz.");
 #endif
         }
 
@@ -731,13 +732,13 @@ namespace Mirror
                     // Return false to not allow collision-destroyed second instance to continue.
                     return false;
                 }
-                logger.Log("NetworkManager created singleton (DontDestroyOnLoad)");
+                logger.Log("[Server] NetworkManager created singleton (DontDestroyOnLoad)");
                 singleton = this;
                 if (Application.isPlaying) DontDestroyOnLoad(gameObject);
             }
             else
             {
-                logger.Log("NetworkManager created singleton (ForScene)");
+                logger.Log("[Server] NetworkManager created singleton (ForScene)");
                 singleton = this;
             }
 
@@ -834,7 +835,7 @@ namespace Mirror
                 return;
             }
 
-            if (logger.logEnabled) logger.Log("ServerChangeScene " + newSceneName);
+            if (logger.logEnabled) logger.Log("[Server] ServerChangeScene " + newSceneName);
             NetworkServer.SetAllClientsNotReady();
             networkSceneName = newSceneName;
 
@@ -1099,7 +1100,7 @@ namespace Mirror
         /// <param name="start">Transform to register.</param>
         public static void RegisterStartPosition(Transform start)
         {
-            if (logger.LogEnabled()) logger.Log("RegisterStartPosition: (" + start.gameObject.name + ") " + start.position);
+            if (logger.LogEnabled()) logger.Log("[Server] RegisterStartPosition: (" + start.gameObject.name + ") " + start.position);
             startPositions.Add(start);
 
             // reorder the list so that round-robin spawning uses the start positions
@@ -1116,7 +1117,7 @@ namespace Mirror
         /// <param name="start">Transform to unregister.</param>
         public static void UnRegisterStartPosition(Transform start)
         {
-            if (logger.LogEnabled()) logger.Log("UnRegisterStartPosition: (" + start.gameObject.name + ") " + start.position);
+            if (logger.LogEnabled()) logger.Log("[Server] UnRegisterStartPosition: (" + start.gameObject.name + ") " + start.position);
             startPositions.Remove(start);
         }
 
@@ -1131,7 +1132,9 @@ namespace Mirror
             startPositions.RemoveAll(t => t == null);
 
             if (startPositions.Count == 0)
+            {
                 return null;
+            }
 
             if (playerSpawnMethod == PlayerSpawnMethod.Random)
             {
@@ -1386,10 +1389,10 @@ namespace Mirror
             // OnClientConnect by default calls AddPlayer but it should not do
             // that when we have online/offline scenes. so we need the
             // clientLoadedScene flag to prevent it.
-            if (clientLoadedScene)
+            if (!clientLoadedScene)
             {
                 // Ready/AddPlayer is usually triggered by a scene load completing. if no scene was loaded, then Ready/AddPlayer it here instead.
-                if (!ClientScene.ready) ClientScene.Ready(conn);
+                //if (!ClientScene.ready) ClientScene.Ready(conn);
                 if (autoCreatePlayer)
                 {
                     ClientScene.AddPlayer(conn);

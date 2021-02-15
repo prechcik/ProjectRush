@@ -10,6 +10,8 @@ public class PlayerMovement : NetworkBehaviour
     private NavMeshAgent agent;
     public LayerMask mask;
 
+    public bool walking;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -20,7 +22,7 @@ public class PlayerMovement : NetworkBehaviour
     void Update()
     {
         if (!hasAuthority) { return; }
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && Camera.main.name == "Main Camera")
         {
             int touchIndex = -1;
             if (Input.touchCount > 0)
@@ -33,14 +35,19 @@ public class PlayerMovement : NetworkBehaviour
             RaycastHit hit;
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity, mask))
             {
-                if (EventSystem.current.IsPointerOverGameObject(touchIndex)) { 
-                    return;
+                if (EventSystem.current.IsPointerOverGameObject(touchIndex)) {
+                    if (!hit.collider.CompareTag("UIClickableThrough"))
+                    {
+                        return;
+                    }
                 }
+                walking = true;
                 agent.SetDestination(hit.point);
             }
         }
         if (agent.hasPath && agent.remainingDistance < 0.1f)
         {
+            walking = false;
             agent.ResetPath();
         }
     }

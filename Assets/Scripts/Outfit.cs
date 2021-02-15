@@ -11,11 +11,14 @@ public class Outfit : MonoBehaviour
     public int id;
     public Sprite icon;
     public int rarity = 0;
+    public float lootPercent;
 
     public Outfit(int id, string name)
     {
         this.id = id;
         this.outfitName = name;
     }
+
+    
 
 }

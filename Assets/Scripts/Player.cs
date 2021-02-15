@@ -14,13 +14,15 @@ public class Player : NetworkBehaviour
     [SyncVar]
     public PlayerInfo info;
     public GameObject modelContainer;
+    public ParticleSystem levelUpParticle;
+    public ParticleSystem levelUpParticle2;
     public int activeOutfit = 0;
     public string userId;
     [SyncVar]
     public Quaternion playerRotation;
     [SyncVar]
     public Vector3 playerPosition;
-    private NavMeshAgent agent;
+    public NavMeshAgent agent;
     [SyncVar]
     public List<int> outfits;
 
@@ -28,7 +30,9 @@ public class Player : NetworkBehaviour
     public int currentExp;
     [SyncVar]
     public int currentLevel;
+    public int level;
 
+    public ParticleSystem boostParticles;
     
 
     private GameDB gameDB;
@@ -50,28 +54,66 @@ public class Player : NetworkBehaviour
 
     private MainUI ui;
 
-    
+    private PlayerMovement movementScript;
+
+    [SyncVar]
+    public bool spawnedAndReady = false;
+
+    private GameObject destinationMarker;
+
+    public OutfitDatabase oDB;
+
+    [SyncVar]
+    public float playerSpeed = 2f;
+
+
+
+    private void Awake()
+    {
+        NavMeshHit hit;
+        // Check for nearest point on navmesh to agent, within onMeshThreshold
+        if (NavMesh.SamplePosition(this.transform.position, out hit, Mathf.Infinity, NavMesh.AllAreas))
+        {
+            if (hit.hit)
+            {
+                this.transform.position = hit.position;
+            }
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
     {
+        gameDB = FindObjectOfType<GameDB>();
+        agent = this.GetComponent<NavMeshAgent>();
+        ui = FindObjectOfType<MainUI>();
         if (isLocalPlayer)
         {
             Camera.main.GetComponent<CameraMovement>().target = this.transform;
             mainUI = FindObjectOfType<MainUI>();
             mainUI.HideBlank();
+            movementScript = this.GetComponent<PlayerMovement>();
+            mainUI.dashButton.onClick.AddListener(delegate
+            {
+                float newSpeed = this.playerSpeed * 3f;
+                SetBoostSpeed(newSpeed, 1f);
+                mainUI.dashButton.enabled = false;
+                Invoke(nameof(ResetDash), 5f);
+            });
         }
-        gameDB = FindObjectOfType<GameDB>();
-        agent = this.GetComponent<NavMeshAgent>();
-        currentExp = info.experience;
-        currentLevel = info.level;
+        spawnedAndReady = false;
         lastPos = new Vector3(info.x,info.y,info.z);
-        ui = FindObjectOfType<MainUI>();
+        agent.enabled = true;
+        spawnedAndReady = true;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (gameDB == null)
+        {
+            gameDB = FindObjectOfType<GameDB>();
+        }
         if (this.GetComponentInChildren<TextMesh>().text != nickname) this.GetComponentInChildren<TextMesh>().text = nickname;
         if (activeOutfit != currentOutfit)
         {
@@ -82,9 +124,39 @@ public class Player : NetworkBehaviour
         {
             UpdateRot(transform.rotation);
             UpdatePos(transform.position);
-            HandleLevel();
-            HandleExperience();
+            currentLevel = CalculateLevel(currentExp);
+            if (currentLevel > level)
+            {
+                if (level > 0)
+                {
+                    levelUpParticle.Play();
+                    levelUpParticle2.Play();
+                    ShowRewardIcon();
+                }
+                HandleLevel(currentLevel);
+                level = currentLevel;
+            }
+            
+            if (spawnedAndReady)
+            {
+                HandleExperience();
+            }
             UpdateExpBar();
+            if (destinationMarker == null)
+            {
+                destinationMarker = Instantiate(gameDB.destinationMarker);
+                destinationMarker.SetActive(false);
+            }
+            if (agent.hasPath && destinationMarker != null)
+            {
+                destinationMarker.SetActive(true);
+                destinationMarker.transform.position = agent.destination;
+
+            }
+            else
+            {
+                destinationMarker.SetActive(false);
+            }
         }
         else if (!isLocalPlayer && isClient)
         {
@@ -99,6 +171,44 @@ public class Player : NetworkBehaviour
             playerAnimator.SetFloat("speed", this.speed);
         }
         lastLocalPos = this.transform.position;
+        if (agent.speed != playerSpeed)
+        {
+            agent.speed = playerSpeed;
+        }
+        if (playerSpeed > 2f)
+        {
+            if (!boostParticles.isPlaying)
+            {
+                boostParticles.Play();
+            }
+        } else
+        {
+            boostParticles.Stop();
+        }
+    }
+
+    public void OnTriggerEnter(Collider collision)
+    {
+        if (collision.gameObject.GetComponent<TemporaryBoost>() != null)
+        {
+            
+            TemporaryBoost boost = collision.gameObject.GetComponent<TemporaryBoost>();
+            //Debug.Log("Player " + info.nickname + " touched the boost " + boost.type + " * " + boost.time + "s");
+            NetworkClient.Send(new NetworkManagement.BoostRequest
+            {
+                type = boost.type,
+                amount = boost.amount,
+                time = boost.time
+            });
+            SetBoostSpeed(agent.speed * boost.amount, boost.time);
+            DestroyBoost(collision.gameObject);
+        }
+    }
+
+    [Command]
+    public void DestroyBoost(GameObject obj)
+    {
+        Destroy(obj);
     }
 
     public void ChangeOutfit(int newOufit)
@@ -107,12 +217,12 @@ public class Player : NetworkBehaviour
         {
             Destroy(t.gameObject);
         }
-        foreach (GameObject o in gameDB.outfitList) {
-            Outfit ou = o.GetComponent<Outfit>();
+        foreach (OutfitDatabase.DBOutfit o in oDB.outfitList) {
+            Outfit ou = o.outfitPrefab.GetComponent<Outfit>();
             if (ou != null && ou.id == newOufit)
             {
-                GameObject playerModel = Instantiate(o, o.transform.localPosition, netIdentity.GetComponent<Player>().transform.rotation, netIdentity.GetComponent<Player>().modelContainer.transform);
-                playerModel.transform.localPosition = o.transform.localPosition;
+                GameObject playerModel = Instantiate(o.outfitPrefab, o.outfitPrefab.transform.localPosition, netIdentity.GetComponent<Player>().transform.rotation, netIdentity.GetComponent<Player>().modelContainer.transform);
+                playerModel.transform.localPosition = o.outfitPrefab.transform.localPosition;
                 netIdentity.GetComponent<Player>().activeOutfit = currentOutfit;
                 netIdentity.GetComponent<Player>().playerAnimator = playerModel.GetComponent<Animator>();
             }
@@ -122,26 +232,64 @@ public class Player : NetworkBehaviour
     [Command]
     public void UpdateRot(Quaternion rot)
     {
-        playerRotation = rot;
+        this.playerRotation = rot;
+        connectionToClient.identity.GetComponent<Player>().playerRotation = rot;
     }
 
     [Command]
     public void UpdatePos(Vector3 pos)
     {
-        playerPosition = pos;
+        this.playerPosition = pos;
+        connectionToClient.identity.GetComponent<Player>().playerPosition = pos;
     }
 
     [Command]
-    public void HandleLevel()
+    public void HandleLevel(int level)
     {
-        currentLevel = CalculateLevel(currentExp);
-        if (currentLevel != info.level)
+        this.info.level = level;
+        connectionToClient.identity.GetComponent<Player>().info = this.info;
+        this.level = level;
+        Debug.LogFormat("Player [{0}] has leveled up to level {1}", this.nickname, this.level);
+        gameDB.network.OnPlayerUpdateRequest(connectionToClient, new NetworkManagement.PlayerUpdateRequest { });
+    }
+
+    [Command]
+    public void ShowPackageScreen()
+    {
+        
+        gameDB.mainUI.RewardIcon.SetActive(false);
+    }
+
+    [Command]
+    public void SetBoostSpeed(float newSpeed, float time)
+    {
+        this.playerSpeed = newSpeed;
+        this.agent.speed = newSpeed;
+        Invoke(nameof(ResetSpeed), time);
+
+    }
+
+    public void ResetSpeed()
+    {
+        this.agent.speed = 2f;
+        this.playerSpeed = 2f;
+    }
+
+    public void ToggleSpeedBoostParticles(bool play)
+    {
+        if (!play)
         {
-            Debug.Log("Updated player level to " + currentLevel + ", experience: " + currentExp);
-            info.level = currentLevel;
-            gameDB.DBManager.UpdatePlayerInfo(connectionToClient.identity.GetComponent<Player>());
-            connectionToClient.Send(new NetworkManagement.PackagePacket { });
+            this.boostParticles.Stop();
         }
+        else
+        {
+            this.boostParticles.Play();
+        }
+    }
+
+    public void ShowRewardIcon()
+    {
+        this.gameDB.mainUI.RewardIcon.SetActive(true);
     }
 
     
@@ -185,7 +333,7 @@ public class Player : NetworkBehaviour
         currentPercent = percent;
         float lerpPercent = Mathf.Lerp(mainUI.expPanelImage.GetComponent<Image>().fillAmount, percent, Time.deltaTime * 5f);
         mainUI.expPanelImage.GetComponent<Image>().fillAmount = lerpPercent;
-        mainUI.expPanelText.GetComponent<Text>().text = lerpPercent.ToString("0.00%");
+        mainUI.expPanelText.GetComponent<Text>().text = "Level " + currentLevel + " (" + lerpPercent.ToString("0.00%") + ")";
     }
 
 
@@ -202,26 +350,21 @@ public class Player : NetworkBehaviour
 
     public void SendToNearby()
     {
-        Collider[] nearbyPlayers = Physics.OverlapSphere(netIdentity.transform.position, 3f);
+        Collider[] nearbyPlayers = Physics.OverlapSphere(netIdentity.transform.position, gameDB.chatProximity);
         List<NetworkIdentity> playersSent = new List<NetworkIdentity>();
         playersSent.Add(netIdentity);
-        foreach (Collider hitPlayer in nearbyPlayers)
+        NetworkIdentity[] idents = FindObjectsOfType<NetworkIdentity>();
+        foreach (NetworkIdentity i in idents)
         {
-                //Debug.Log("Found player " + hitPlayer.GetComponent<Player>().nickname + ", MyIdentity: " + netIdentity.GetComponent<Player>().nickname);
-                if (hitPlayer.GetComponent<NetworkIdentity>() != null && !hitPlayer.GetComponent<NetworkIdentity>() != netIdentity)
+            if (Vector3.Distance(i.transform.position, this.netIdentity.transform.position) < gameDB.chatProximity)
+            {
+                if (i.GetComponent<Player>() != null)
                 {
-                    if (!playersSent.Contains(hitPlayer.GetComponent<NetworkIdentity>()))
-                    {
-                        netIdentity.GetComponent<Player>().CmdSendMessage(new ChatBox.ChatMsg { sender = netIdentity.GetComponent<Player>().nickname, message = netIdentity.GetComponent<Player>().ui.chatInputField.text });
-                        playersSent.Add(hitPlayer.GetComponent<NetworkIdentity>());
-                    }
+                    i.GetComponent<Player>().CmdSendMessage(new ChatBox.ChatMsg { sender = i.GetComponent<Player>().nickname, message = i.GetComponent<Player>().ui.chatInputField.text });
                 }
+            }
         }
-        if (playersSent.Count < 2)
-        {
-            netIdentity.GetComponent<ChatBox>().HandleNewMessage(new ChatBox.ChatMsg { sender = netIdentity.GetComponent<Player>().nickname, message = netIdentity.GetComponent<Player>().ui.chatInputField.text });
 
-        }
     }
 
     [Command]
@@ -234,6 +377,12 @@ public class Player : NetworkBehaviour
     private void RpcHandleMessage(ChatBox.ChatMsg msg)
     {
         netIdentity.GetComponent<ChatBox>().HandleNewMessage(msg);
+    }
+
+
+    public void ResetDash()
+    {
+        mainUI.dashButton.enabled = true;
     }
 
 

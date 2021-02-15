@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 9500000}
   - component: {fileID: 4874400612055114947}
   m_Layer: 0
-  m_Name: Lumberjack3
+  m_Name: 8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -177,7 +177,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 3c90d75d090136b429461873af7f9f1f, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
@@ -199,6 +199,7 @@ MonoBehaviour:
   id: 8
   icon: {fileID: 21300000, guid: 1f170c03ec5ad1443bee93b35d840db9, type: 3}
   rarity: 0
+  lootPercent: 50
 --- !u!1 &100010
 GameObject:
   m_ObjectHideFlags: 0

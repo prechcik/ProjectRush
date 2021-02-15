@@ -1,3 +1,4 @@
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +12,11 @@ public class MainUI : MonoBehaviour
     public GameObject expPanelImage;
     public GameObject expPanelText;
     public GameObject packageUI;
+    public Image progressImage;
+    public GameObject RewardIcon;
+    public Button RewardIconButton;
+    public GameDB gameDB;
+    public Button dashButton;
 
 
     [Header("Chat Objects")]
@@ -22,6 +28,10 @@ public class MainUI : MonoBehaviour
     public GameObject chatCloudPrefab;
     // Start is called before the first frame update
 
+    public void Start()
+    {
+        gameDB = FindObjectOfType<GameDB>();
+    }
 
 
     public void HideBlank()
@@ -45,5 +55,18 @@ public class MainUI : MonoBehaviour
     public void ToggleChat()
     {
         ChatBox.SetActive(!ChatBox.activeSelf);
+    }
+
+
+    public void RewardButton()
+    {
+        Debug.Log("Clicked UI Package");
+        gameDB.SwitchToRewardCamera();
+        gameDB.rewardRoomScript.ResetRoom();
+        gameDB.mainUI.bottomPanel.SetActive(false);
+        gameDB.mainUI.ChatBox.SetActive(false);
+        gameDB.mainUI.dashButton.gameObject.SetActive(false);
+        gameDB.mainUI.expPanelImage.transform.parent.gameObject.SetActive(false);
+        RewardIcon.SetActive(false);
     }
 }

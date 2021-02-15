@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameDB : MonoBehaviour
 {
@@ -18,6 +19,20 @@ public class GameDB : MonoBehaviour
     public NetworkManagement network;
 
     public float expRate = 3 / 2;
+
+    public OutfitDatabase outfitDB;
+
+    public Camera mainCamera, rewardCamera;
+
+    public RewardRoom rewardRoomScript;
+    public MainUI mainUI;
+
+    public GameObject destinationMarker;
+    public float chatProximity;
+
+    public Gradient rarityColors;
+
+
 
 
     // Start is called before the first frame update
@@ -37,15 +52,48 @@ public class GameDB : MonoBehaviour
     }
 
     // Update is called once per frame
+    [ClientCallback]
     void Update()
     {
-        
+        if (SceneManager.GetActiveScene().name == "MainGame")
+        {
+            if (rewardRoomScript == null)
+            {
+                rewardRoomScript = FindObjectOfType<RewardRoom>();
+            }
+            if (mainUI == null)
+            {
+                mainUI = FindObjectOfType<MainUI>();
+            }
+            if (mainCamera == null || rewardCamera == null)
+            {
+                CameraIdentifier[] camList = FindObjectsOfType<CameraIdentifier>();
+                foreach (CameraIdentifier cam in camList)
+                {
+                    if (cam.camName == "MainCamera")
+                    {
+                        mainCamera = cam.GetComponent<Camera>();
+                    }
+                    if (cam.camName == "RewardCamera")
+                    {
+                        rewardCamera = cam.GetComponent<Camera>();
+                    }
+                }
+            }
+        }
     }
 
     public List<int> GetRandomOutfits(int amount)
     {
         randList = new List<int>();
-        List<int> playerOutfits = NetworkClient.connection.identity.GetComponent<Player>().outfits;
+        List<int> playerOutfits = new List<int>();
+        if (NetworkClient.connection.identity != null)
+        {
+            playerOutfits = NetworkClient.connection.identity.GetComponent<Player>().outfits;
+        } else
+        {
+            playerOutfits = new List<int>();
+        }
         List<int> allOutfits = new List<int>();
         foreach (GameObject g in outfitList)
         {
@@ -82,5 +130,25 @@ public class GameDB : MonoBehaviour
         return packageRarities[index];
     }
 
+    public void SwitchToMainCamera()
+    {
+        rewardCamera.enabled = false;
+        mainCamera.enabled = true;
+    }
+
+    public void SwitchToRewardCamera()
+    {
+        mainCamera.enabled = false;
+        rewardCamera.enabled = true;
+    }
+
+    public static Vector3 RandomPointInBounds(Bounds bounds)
+    {
+        return new Vector3(
+            UnityEngine.Random.Range(bounds.min.x, bounds.max.x),
+            UnityEngine.Random.Range(bounds.min.y, bounds.max.y),
+            UnityEngine.Random.Range(bounds.min.z, bounds.max.z)
+        );
+    }
 
 }

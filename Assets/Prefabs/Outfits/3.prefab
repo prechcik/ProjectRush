@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 95782878299265946}
   - component: {fileID: 7622382925189777258}
   m_Layer: 0
-  m_Name: Boximon Cyclopes
+  m_Name: 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -179,7 +179,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: cad4cd74f41924a4bbcbe916d2f9cb9b, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
@@ -200,7 +200,8 @@ MonoBehaviour:
   outfitName: CyclopsFrost
   id: 3
   icon: {fileID: 21300000, guid: c8e8c7d385f34014290014ceb0528e87, type: 3}
-  rarity: 0
+  rarity: 4
+  lootPercent: 20
 --- !u!1 &1159647506406770
 GameObject:
   m_ObjectHideFlags: 0

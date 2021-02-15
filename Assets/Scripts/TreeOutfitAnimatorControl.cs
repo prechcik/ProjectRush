@@ -6,6 +6,7 @@ public class TreeOutfitAnimatorControl : MonoBehaviour
 {
 
     public Animator animator;
+    public float speed = 20f;
     // Start is called before the first frame update
     void Start()
     {
@@ -15,6 +16,6 @@ public class TreeOutfitAnimatorControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        animator.speed = animator.GetFloat("speed") / 20f;
+        animator.speed = animator.GetFloat("speed") / speed;
     }
 }

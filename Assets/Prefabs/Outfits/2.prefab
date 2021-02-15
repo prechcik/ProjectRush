@@ -1030,7 +1030,7 @@ Transform:
   m_GameObject: {fileID: 1927408138077048}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -0.06, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 0.35, y: 0.35, z: 0.35}
   m_Children:
   - {fileID: 4356911746106276}
   - {fileID: 4467192714240526}
@@ -1053,7 +1053,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 6fe4e38bf40bbad409ff741d6ba42bbf, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
@@ -1074,4 +1074,5 @@ MonoBehaviour:
   outfitName: BeKind
   id: 2
   icon: {fileID: 21300000, guid: 81a660b772a299940806eefa08559c8a, type: 3}
-  rarity: 0
+  rarity: 3
+  lootPercent: 25

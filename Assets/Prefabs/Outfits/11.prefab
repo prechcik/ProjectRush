@@ -594,7 +594,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: ba96c364b526e8748b758377318a232b, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
@@ -615,7 +615,8 @@ MonoBehaviour:
   outfitName: Santa
   id: 11
   icon: {fileID: 21300000, guid: b0bf8d4655a5ed746b7d0957a39a0bea, type: 3}
-  rarity: 2
+  rarity: 4
+  lootPercent: 1
 --- !u!1 &1475716869458680
 GameObject:
   m_ObjectHideFlags: 0

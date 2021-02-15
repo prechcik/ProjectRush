@@ -26,6 +26,7 @@ public class ChatBox : NetworkBehaviour
         if (isLocalPlayer)
         {
             ui = FindObjectOfType<MainUI>();
+            ui.chatButton.onClick.RemoveAllListeners();
             ui.chatButton.onClick.AddListener(delegate { this.gameObject.GetComponent<Player>().Send(); ui.chatInputField.text = ""; });
         }
     }
@@ -42,7 +43,7 @@ public class ChatBox : NetworkBehaviour
     [ClientCallback]
     public void HandleNewMessage(ChatMsg msg)
     {
-        if (ui.messageContainer.childCount > 6)
+        if (ui.messageContainer.childCount > 4)
         {
             Destroy(ui.messageContainer.GetChild(0).gameObject);
         }
@@ -58,7 +59,7 @@ public class ChatBox : NetworkBehaviour
             {
                 ChatCloud cloudScript = messageCloud.GetComponent<ChatCloud>();
                 cloudScript.cloudText.text = msg.message;
-                cloudScript.target = p.transform;
+                cloudScript.target = p.transform.GetComponentInChildren<TextMesh>().transform;
 
             }
         }

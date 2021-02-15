@@ -467,7 +467,7 @@ Transform:
   m_GameObject: {fileID: 2067522734183174338}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.04, z: 0}
-  m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children:
   - {fileID: 2067522734183664864}
   - {fileID: 2067522734183664862}
@@ -508,7 +508,8 @@ MonoBehaviour:
   outfitName: Astronaut
   id: 16
   icon: {fileID: 21300000, guid: 1e302443d030e704485ecadb916e1cdc, type: 3}
-  rarity: 2
+  rarity: 4
+  lootPercent: 2
 --- !u!1 &2067522734183174340
 GameObject:
   m_ObjectHideFlags: 0

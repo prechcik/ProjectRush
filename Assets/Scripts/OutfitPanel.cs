@@ -48,10 +48,16 @@ public class OutfitPanel : MonoBehaviour
                 CardObj.GetComponent<Image>().fillAmount = 1f;
                 Destroy(CardObj.GetComponent<Animator>());
                 OutfitCard card = CardObj.GetComponent<OutfitCard>();
-                card.cardButton.onClick.AddListener(delegate { NetworkClient.Send(new NetworkManagement.OutfitRequest { outfitid = id }); Debug.Log("Sending outfit change request [" + id + "] for player " + NetworkClient.connection.identity.GetComponent<Player>().nickname); TogglePanel(); });
+                card.cardButton.onClick.RemoveAllListeners();
+                card.cardButton.onClick.AddListener(delegate { card.cardButton.enabled = false; NetworkClient.Send(new NetworkManagement.OutfitRequest { outfitid = id }); Debug.Log("Sending outfit change request [" + id + "] for player " + NetworkClient.connection.identity.GetComponent<Player>().nickname); TogglePanel(); });
                 card.cardOutfit.sprite = newOutfit.icon;
                 
                 card.cardRarity.sprite = gameDB.GetRaritySprite(newOutfit.rarity);
+                float outfitRarity = newOutfit.rarity * 1f;
+                float totalRarities = gameDB.packageRarities.Count * 1f;
+                float rarityPercent = outfitRarity / totalRarities;
+                card.cardRarity.color = gameDB.rarityColors.Evaluate(rarityPercent);
+                card.cardButton.enabled = true;
             }
 
         }

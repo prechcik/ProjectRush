@@ -37,6 +37,8 @@ public class FirebaseManager : MonoBehaviour
 
     public PlayerInfo pInfo;
 
+    private bool usernameTaken = false;
+
 
 
     private int[] tempOutfits;
@@ -54,7 +56,7 @@ public class FirebaseManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError("Could not resolve all Firebase dependencies: " + dependencyStatus);
+                Debug.LogError("[Firebase] Could not resolve all Firebase dependencies: " + dependencyStatus);
             }
         });
 
@@ -69,7 +71,7 @@ public class FirebaseManager : MonoBehaviour
 
     private void InitializeFirebase()
     {
-        Debug.Log("Setting up Firebase Auth");
+        Debug.Log("[Firebase] Setting up Firebase Auth");
         //Set the authentication instance object
         auth = FirebaseAuth.DefaultInstance;
         //FirebaseDatabase.DefaultInstance.SetPersistenceEnabled(false);
@@ -84,7 +86,7 @@ public class FirebaseManager : MonoBehaviour
 
     public void RegisterButton()
     {
-        StartCoroutine(Register(registerUserField.text, registerPasswordField.text, registerPassword2Field.text));
+        StartCoroutine(Register(registerUserField.text, registerPasswordField.text, registerPassword2Field.text, nicknameField.text));
     }
 
     
@@ -130,7 +132,7 @@ public class FirebaseManager : MonoBehaviour
             //User is now logged in
             //Now get the result
             User = LoginTask.Result;
-            Debug.LogFormat("User signed in successfully: {0} ({1})", User.DisplayName, User.Email);
+            Debug.LogFormat("[Firebase] User {0} ({1}) signed in successfully", User.DisplayName, User.Email);
             loginStatusText.text = "Logged In";
             yield return new WaitForSeconds(2f);
             
@@ -139,9 +141,13 @@ public class FirebaseManager : MonoBehaviour
         }
     }
 
-    private IEnumerator Register(string _email, string _password, string _username)
+    private IEnumerator Register(string _email, string _password, string _username, string _nickname)
     {
-        if (_username == "")
+        StartCoroutine(CheckNickname(_nickname));
+        if (usernameTaken)
+        {
+            registerStatusText.text = "Nickname already taken!";
+        } else if (_username == "")
         {
             //If the username field is blank show a warning
             registerStatusText.text = "Missing Username";
@@ -200,6 +206,7 @@ public class FirebaseManager : MonoBehaviour
                     //Wait until the task completes
                     yield return new WaitUntil(predicate: () => ProfileTask.IsCompleted);
 
+
                     if (ProfileTask.Exception != null)
                     {
                         //If there are errors handle them
@@ -209,10 +216,29 @@ public class FirebaseManager : MonoBehaviour
                     else
                     {
                         //Username is now set
+
+                        // Create initial data
+                        var DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("nickname").SetValueAsync(_nickname);
+                        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("currentOutfit").SetValueAsync(network.defaultPlayerModelId);
+                        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("outfits").SetValueAsync("" + network.defaultPlayerModelId);
+                        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("x").SetValueAsync(0);
+                        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("y").SetValueAsync(0);
+                        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("z").SetValueAsync(0);
+                        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("experience").SetValueAsync(0);
+                        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("level").SetValueAsync(1);
+                        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+
                         //Now return to login screen
                         loginUserField.text = _email;
                         UIManager.ShowLogin();
-                        registerStatusText.text = "";
+                        loginStatusText.text = "Account created successfully! You can log in now!";
                     }
                 }
             }
@@ -261,7 +287,7 @@ public class FirebaseManager : MonoBehaviour
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
         DBTask = DBRefrence.Child("users").Child(p.userId).Child("experience").SetValueAsync(p.currentExp);
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
-        DBTask = DBRefrence.Child("users").Child(p.userId).Child("level").SetValueAsync(p.currentLevel);
+        DBTask = DBRefrence.Child("users").Child(p.userId).Child("level").SetValueAsync(p.info.level);
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
     }
 
@@ -276,15 +302,12 @@ public class FirebaseManager : MonoBehaviour
 
     public IEnumerator AddPlayerOutfit(int id)
     {
-        
-        Debug.Log("Add " + id);
         string outfitS = network.playerInfo.outfits;
         outfitS += "," + id;
-        Debug.Log("Player outfits: " + outfitS);
         network.playerInfo.outfits = outfitS;
         var DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("outfits").SetValueAsync(outfitS);
         yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
-        Debug.Log("Player " + pInfo.nickname + " retrieved outfit with id " + id);
+        //Debug.Log("Player " + pInfo.nickname + " retrieved outfit with id " + id);
         DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("currentOutfit").SetValueAsync(id);
         yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
         SceneManager.LoadSceneAsync("MainGame");
@@ -329,9 +352,35 @@ public class FirebaseManager : MonoBehaviour
         yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
         DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("outfits").SetValueAsync(p.outfits);
         yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("level").SetValueAsync(p.level);
+        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("experience").SetValueAsync(p.experience);
+        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+        Debug.Log("[Firebase] Saved data for player [" + p.nickname + "]");
 
     }
 
-    
-    
+    public IEnumerator CheckNickname(string nick)
+    {
+        bool res = true;
+
+        var DBTask = DBRefrence.Child("users").OrderByChild("nickname").EqualTo(nick).GetValueAsync();
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+        if (DBTask.Exception != null)
+        {
+            Debug.Log(DBTask.Exception);
+        } else
+        {
+            DataSnapshot snapshot = DBTask.Result;
+            if (snapshot.Exists)
+            {
+                res = true;
+            } else
+            {
+                res = false;
+            }
+        }
+        usernameTaken = res;
+    }
+
 }

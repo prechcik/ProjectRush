@@ -108,7 +108,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: ba96c364b526e8748b758377318a232b, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
@@ -129,7 +129,8 @@ MonoBehaviour:
   outfitName: PolyZombie
   id: 18
   icon: {fileID: 21300000, guid: 92a015e12ed0a90419d0bbc20fe5797d, type: 3}
-  rarity: 1
+  rarity: 0
+  lootPercent: 50
 --- !u!1 &856601670117699840
 GameObject:
   m_ObjectHideFlags: 0

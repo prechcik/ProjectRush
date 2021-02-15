@@ -830,7 +830,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: ba96c364b526e8748b758377318a232b, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
@@ -852,6 +852,7 @@ MonoBehaviour:
   id: 15
   icon: {fileID: 21300000, guid: 86bce55fe7279d74aa6becbe2c9e6c78, type: 3}
   rarity: 0
+  lootPercent: 50
 --- !u!1 &7447163605589988732
 GameObject:
   m_ObjectHideFlags: 0

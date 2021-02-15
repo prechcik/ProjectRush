@@ -856,7 +856,8 @@ MonoBehaviour:
   outfitName: Mummy
   id: 10
   icon: {fileID: 21300000, guid: 73f6244488e917345a123d1fdaf9ff30, type: 3}
-  rarity: 2
+  rarity: 3
+  lootPercent: 20
 --- !u!114 &7729553686140382188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -870,6 +871,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 1136893558522900651}
+  speed: 1
 --- !u!1 &1136893558532244271
 GameObject:
   m_ObjectHideFlags: 0

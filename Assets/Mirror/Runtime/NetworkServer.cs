@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Mirror.RemoteCalls;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace Mirror
 {
@@ -1057,6 +1058,7 @@ namespace Mirror
                 bool isOwner = identity.connectionToClient == conn;
 
                 ArraySegment<byte> payload = CreateSpawnMessagePayload(isOwner, identity, ownerWriter, observersWriter);
+                
 
                 SpawnMessage msg = new SpawnMessage
                 {
@@ -1066,7 +1068,8 @@ namespace Mirror
                     sceneId = identity.sceneId,
                     assetId = identity.assetId,
                     // use local values for VR support
-                    position = identity.transform.localPosition,
+                    
+                    position = identity.transform.position,
                     rotation = identity.transform.localRotation,
                     scale = identity.transform.localScale,
 

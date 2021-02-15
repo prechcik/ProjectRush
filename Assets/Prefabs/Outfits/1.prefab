@@ -5043,7 +5043,7 @@ Transform:
   m_GameObject: {fileID: 4800839809881058091}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.2, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
+  m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_Children:
   - {fileID: 1226090471838499182}
   - {fileID: 5369955607875091477}
@@ -5084,7 +5084,8 @@ MonoBehaviour:
   outfitName: AngryLog
   id: 1
   icon: {fileID: 21300000, guid: 217089d97f72d964480e34bafc3fafc8, type: 3}
-  rarity: 2
+  rarity: 4
+  lootPercent: 5
 --- !u!114 &5761685957751290026
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5098,6 +5099,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 1905401176132809794}
+  speed: 20
 --- !u!1 &5464489719840728496
 GameObject:
   m_ObjectHideFlags: 0

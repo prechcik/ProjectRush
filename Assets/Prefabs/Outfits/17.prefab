@@ -77,7 +77,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: ba96c364b526e8748b758377318a232b, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
@@ -98,7 +98,8 @@ MonoBehaviour:
   outfitName: PolyPolice
   id: 17
   icon: {fileID: 21300000, guid: 57c515287a6f62c4c943af3ff309907f, type: 3}
-  rarity: 2
+  rarity: 1
+  lootPercent: 50
 --- !u!1 &8619338778009079855
 GameObject:
   m_ObjectHideFlags: 0

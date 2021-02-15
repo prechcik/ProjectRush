@@ -1,0 +1,327 @@
+fileFormatVersion: 2
+guid: a6beb0efc8bd94999bed718fe7eb8326
+timeCreated: 1454231970
+licenseType: Store
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: Chest_Body
+    100004: Chest_Lid
+    100006: Coin_Plane
+    100008: Coins
+    100010: Handle_L
+    100012: Handle_R
+    100014: polySurface19
+    100016: polySurface20
+    100018: polySurface21
+    100020: polySurface22
+    100022: polySurface23
+    100024: polySurface24
+    100026: polySurface25
+    100028: polySurface26
+    100030: polySurface27
+    100032: polySurface28
+    100034: polySurface29
+    100036: polySurface30
+    100038: polySurface31
+    100040: polySurface32
+    100042: polySurface33
+    100044: polySurface34
+    100046: polySurface35
+    100048: polySurface36
+    100050: polySurface37
+    100052: polySurface38
+    100054: polySurface39
+    100056: polySurface40
+    100058: polySurface41
+    100060: polySurface42
+    100062: polySurface43
+    100064: polySurface44
+    400000: //RootNode
+    400002: Chest_Body
+    400004: Chest_Lid
+    400006: Coin_Plane
+    400008: Coins
+    400010: Handle_L
+    400012: Handle_R
+    400014: polySurface19
+    400016: polySurface20
+    400018: polySurface21
+    400020: polySurface22
+    400022: polySurface23
+    400024: polySurface24
+    400026: polySurface25
+    400028: polySurface26
+    400030: polySurface27
+    400032: polySurface28
+    400034: polySurface29
+    400036: polySurface30
+    400038: polySurface31
+    400040: polySurface32
+    400042: polySurface33
+    400044: polySurface34
+    400046: polySurface35
+    400048: polySurface36
+    400050: polySurface37
+    400052: polySurface38
+    400054: polySurface39
+    400056: polySurface40
+    400058: polySurface41
+    400060: polySurface42
+    400062: polySurface43
+    400064: polySurface44
+    2300000: Chest_Body
+    2300002: Chest_Lid
+    2300004: Coin_Plane
+    2300006: Handle_L
+    2300008: Handle_R
+    2300010: polySurface19
+    2300012: polySurface20
+    2300014: polySurface21
+    2300016: polySurface22
+    2300018: polySurface23
+    2300020: polySurface24
+    2300022: polySurface25
+    2300024: polySurface26
+    2300026: polySurface27
+    2300028: polySurface28
+    2300030: polySurface29
+    2300032: polySurface30
+    2300034: polySurface31
+    2300036: polySurface32
+    2300038: polySurface33
+    2300040: polySurface34
+    2300042: polySurface35
+    2300044: polySurface36
+    2300046: polySurface37
+    2300048: polySurface38
+    2300050: polySurface39
+    2300052: polySurface40
+    2300054: polySurface41
+    2300056: polySurface42
+    2300058: polySurface43
+    2300060: polySurface44
+    3300000: Chest_Body
+    3300002: Chest_Lid
+    3300004: Coin_Plane
+    3300006: Handle_L
+    3300008: Handle_R
+    3300010: polySurface19
+    3300012: polySurface20
+    3300014: polySurface21
+    3300016: polySurface22
+    3300018: polySurface23
+    3300020: polySurface24
+    3300022: polySurface25
+    3300024: polySurface26
+    3300026: polySurface27
+    3300028: polySurface28
+    3300030: polySurface29
+    3300032: polySurface30
+    3300034: polySurface31
+    3300036: polySurface32
+    3300038: polySurface33
+    3300040: polySurface34
+    3300042: polySurface35
+    3300044: polySurface36
+    3300046: polySurface37
+    3300048: polySurface38
+    3300050: polySurface39
+    3300052: polySurface40
+    3300054: polySurface41
+    3300056: polySurface42
+    3300058: polySurface43
+    3300060: polySurface44
+    4300000: Chest_Lid
+    4300002: Handle_R
+    4300004: Handle_L
+    4300006: Chest_Body
+    4300008: polySurface19
+    4300010: polySurface20
+    4300012: polySurface21
+    4300014: polySurface22
+    4300016: polySurface23
+    4300018: polySurface24
+    4300020: polySurface25
+    4300022: polySurface26
+    4300024: polySurface27
+    4300026: polySurface28
+    4300028: polySurface29
+    4300030: polySurface30
+    4300032: polySurface31
+    4300034: polySurface32
+    4300036: polySurface34
+    4300038: polySurface35
+    4300040: polySurface37
+    4300042: polySurface39
+    4300044: polySurface40
+    4300046: polySurface41
+    4300048: polySurface42
+    4300050: polySurface43
+    4300052: polySurface44
+    4300054: polySurface38
+    4300056: polySurface33
+    4300058: polySurface36
+    4300060: Coin_Plane
+    7400000: Chest_open_01
+    9500000: //RootNode
+    11100000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleRotations: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Chest_open_01
+      takeName: Take 001
+      firstFrame: 1
+      lastFrame: 44
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Chest_Body
+        weight: 1
+      - path: Chest_Lid
+        weight: 1
+      - path: Coin_Plane
+        weight: 1
+      - path: Coins
+        weight: 1
+      - path: Coins/polySurface19
+        weight: 1
+      - path: Coins/polySurface20
+        weight: 1
+      - path: Coins/polySurface21
+        weight: 1
+      - path: Coins/polySurface22
+        weight: 1
+      - path: Coins/polySurface23
+        weight: 1
+      - path: Coins/polySurface24
+        weight: 1
+      - path: Coins/polySurface25
+        weight: 1
+      - path: Coins/polySurface26
+        weight: 1
+      - path: Coins/polySurface27
+        weight: 1
+      - path: Coins/polySurface28
+        weight: 1
+      - path: Coins/polySurface29
+        weight: 1
+      - path: Coins/polySurface30
+        weight: 1
+      - path: Coins/polySurface31
+        weight: 1
+      - path: Coins/polySurface32
+        weight: 1
+      - path: Coins/polySurface33
+        weight: 1
+      - path: Coins/polySurface34
+        weight: 1
+      - path: Coins/polySurface35
+        weight: 1
+      - path: Coins/polySurface36
+        weight: 1
+      - path: Coins/polySurface37
+        weight: 1
+      - path: Coins/polySurface38
+        weight: 1
+      - path: Coins/polySurface39
+        weight: 1
+      - path: Coins/polySurface40
+        weight: 1
+      - path: Coins/polySurface41
+        weight: 1
+      - path: Coins/polySurface42
+        weight: 1
+      - path: Coins/polySurface43
+        weight: 1
+      - path: Coins/polySurface44
+        weight: 1
+      - path: Handle_L
+        weight: 1
+      - path: Handle_R
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 100
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 1
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

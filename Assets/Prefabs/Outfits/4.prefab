@@ -1065,7 +1065,7 @@ GameObject:
   - component: {fileID: 95206688057043068}
   - component: {fileID: -6337327192370080749}
   m_Layer: 0
-  m_Name: Boximon Fiery
+  m_Name: 4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1111,7 +1111,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: cad4cd74f41924a4bbcbe916d2f9cb9b, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
@@ -1132,7 +1132,8 @@ MonoBehaviour:
   outfitName: CyclopsFiery
   id: 4
   icon: {fileID: 21300000, guid: 2af67b4da2933044397baa6bd21e9a14, type: 3}
-  rarity: 1
+  rarity: 4
+  lootPercent: 20
 --- !u!1 &1992369794795074
 GameObject:
   m_ObjectHideFlags: 0
