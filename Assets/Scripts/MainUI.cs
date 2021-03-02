@@ -18,6 +18,8 @@ public class MainUI : MonoBehaviour
     public GameDB gameDB;
     public Button dashButton;
 
+    public GameObject inventoryPanel;
+
 
     [Header("Chat Objects")]
     public GameObject ChatBox;
@@ -63,10 +65,16 @@ public class MainUI : MonoBehaviour
         Debug.Log("Clicked UI Package");
         gameDB.SwitchToRewardCamera();
         gameDB.rewardRoomScript.ResetRoom();
-        gameDB.mainUI.bottomPanel.SetActive(false);
-        gameDB.mainUI.ChatBox.SetActive(false);
-        gameDB.mainUI.dashButton.gameObject.SetActive(false);
-        gameDB.mainUI.expPanelImage.transform.parent.gameObject.SetActive(false);
+        GameDB.mainUI.bottomPanel.SetActive(false);
+        GameDB.mainUI.ChatBox.SetActive(false);
+        GameDB.mainUI.dashButton.gameObject.SetActive(false);
+        GameDB.mainUI.expPanelImage.transform.parent.gameObject.SetActive(false);
         RewardIcon.SetActive(false);
+    }
+
+    public void ToggleInventory()
+    {
+        if (!inventoryPanel.activeSelf) inventoryPanel.GetComponent<InventoryUI>().RefreshInventory();
+        inventoryPanel.SetActive(!inventoryPanel.activeSelf);
     }
 }

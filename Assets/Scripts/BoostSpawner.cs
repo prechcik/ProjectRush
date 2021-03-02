@@ -44,7 +44,7 @@ public class BoostSpawner : MonoBehaviour
                 if (NavMesh.SamplePosition(newMeshPos, out hit, Mathf.Infinity, -1))
                 {
                     newMeshPos = hit.position;
-                    GameObject boostObj = Instantiate(boostList[random], newMeshPos, Quaternion.identity, boostContainer);
+                    GameObject boostObj = Instantiate(boostList[random], newMeshPos, Quaternion.identity, this.transform);
                     NetworkServer.Spawn(boostObj);
                     timer = 0f;
                 }

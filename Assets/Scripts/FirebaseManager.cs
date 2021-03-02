@@ -234,6 +234,14 @@ public class FirebaseManager : MonoBehaviour
                         yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
                         DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("level").SetValueAsync(1);
                         yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("inventory").SetValueAsync("0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+                        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("heldItem").SetValueAsync(0);
+                        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("currentHealth").SetValueAsync(5);
+                        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
+                        DBTask2 = DBRefrence.Child("users").Child(User.UserId).Child("maxHealth").SetValueAsync(5);
+                        yield return new WaitUntil(predicate: () => DBTask2.IsCompleted);
 
                         //Now return to login screen
                         loginUserField.text = _email;
@@ -331,7 +339,26 @@ public class FirebaseManager : MonoBehaviour
         tempId = int.Parse(DBTask2.Result.Value.ToString());
     }
 
-    
+    public void RefreshPlayerInventory(NetworkConnection conn)
+    {
+        StartCoroutine(RefreshPlayerInv(conn));
+    }
+
+    public IEnumerator RefreshPlayerInv(NetworkConnection conn)
+    {
+        string playerId = conn.identity.GetComponent<Player>().info.userId;
+        var DBTask = DBRefrence.Child("users").Child(playerId).Child("inventory").GetValueAsync();
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+        string res = DBTask.Result.Value.ToString();
+        string[] tempList = res.Split(',');
+        int[] list = new int[35];
+        for (int i = 0; i < 35; i++)
+        {
+            list[i] = int.Parse(tempList[i]);
+        }
+        // Send NetworkMessage to requesting client
+        conn.identity.GetComponent<Player>().info.inventory = new List<int>(list); 
+    }
 
     public void UpdatePlayerData(PlayerInfo p)
     {

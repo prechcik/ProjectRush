@@ -22,7 +22,7 @@ public class PlayerMovement : NetworkBehaviour
     void Update()
     {
         if (!hasAuthority) { return; }
-        if (Input.GetMouseButtonDown(0) && Camera.main.name == "Main Camera")
+        if (Input.GetMouseButtonDown(0) && Camera.main.GetComponent<CameraIdentifier>().camName == "MainCamera")
         {
             int touchIndex = -1;
             if (Input.touchCount > 0)

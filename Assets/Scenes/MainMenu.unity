@@ -1557,6 +1557,7 @@ GameObject:
   - component: {fileID: 594930807}
   - component: {fileID: 594930806}
   - component: {fileID: 594930808}
+  - component: {fileID: 594930810}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -1603,13 +1604,14 @@ MonoBehaviour:
   maxConnections: 100
   disconnectInactiveConnections: 1
   disconnectInactiveTimeout: 60
-  authenticator: {fileID: 0}
+  authenticator: {fileID: 594930810}
   playerPrefab: {fileID: 7634858284095974179, guid: 23dc82b55e5139e44a8f100b0da538ff, type: 3}
   autoCreatePlayer: 0
   playerSpawnMethod: 0
   spawnPrefabs:
   - {fileID: 8126964433738225542, guid: 4fd2545503e4d9247902a3798b38f1dd, type: 3}
   - {fileID: 8126964433738225542, guid: 946719d906ebfee4893812b685308228, type: 3}
+  - {fileID: 7066545460421283832, guid: 9407c8c2bca434d49855ac2971ed0958, type: 3}
   DBManager: {fileID: 1166258524}
   defaultStart: {fileID: 0}
   playerInfo:
@@ -1624,7 +1626,14 @@ MonoBehaviour:
     userId: 
     experience: 0
     level: 0
+    inventory: 
+    currentHealth: 0
+    maxHealth: 0
+    heldItem: 0
+    inventoryString: 
   loadingSpeed: 2
+  TimeOfDay: 0
+  timeSpeed: 25
   defaultPlayerModelId: 15
 --- !u!114 &594930808
 MonoBehaviour:
@@ -1658,6 +1667,28 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &594930810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 594930805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 524525da89085424bbc0445425c16634, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnServerAuthenticated:
+    m_PersistentCalls:
+      m_Calls: []
+  OnClientAuthenticated:
+    m_PersistentCalls:
+      m_Calls: []
+  usernameField: {fileID: 351191528}
+  passwordField: {fileID: 473904977}
+  loginResponseText: {fileID: 1445675422}
+  firebase: {fileID: 1166258524}
 --- !u!1 &640792994
 GameObject:
   m_ObjectHideFlags: 0
@@ -1714,12 +1745,11 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 6ede7b7ca1150cd4c88960832dbe1d64, type: 3}
   DBManager: {fileID: 1166258524}
   network: {fileID: 594930807}
-  expRate: 1
+  expRate: 0.25
   outfitDB: {fileID: 11400000, guid: 161de29ac6451ad438c3d46dbe48b5c8, type: 2}
   mainCamera: {fileID: 0}
   rewardCamera: {fileID: 0}
   rewardRoomScript: {fileID: 0}
-  mainUI: {fileID: 0}
   destinationMarker: {fileID: 7482236333705535235, guid: 1938bb97e0c186c4a8faad3b57b25f36, type: 3}
   chatProximity: 100
   rarityColors:
@@ -1751,6 +1781,8 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 5
     m_NumAlphaKeys: 2
+  loginBtn: {fileID: 931358990}
+  loginResponse: {fileID: 1445675422}
 --- !u!4 &640792997
 Transform:
   m_ObjectHideFlags: 0
@@ -2726,6 +2758,11 @@ MonoBehaviour:
     userId: 
     experience: 0
     level: 0
+    inventory: 
+    currentHealth: 0
+    maxHealth: 0
+    heldItem: 0
+    inventoryString: 
 --- !u!4 &1166258525
 Transform:
   m_ObjectHideFlags: 0

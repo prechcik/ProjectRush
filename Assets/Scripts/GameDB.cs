@@ -25,12 +25,14 @@ public class GameDB : MonoBehaviour
     public Camera mainCamera, rewardCamera;
 
     public RewardRoom rewardRoomScript;
-    public MainUI mainUI;
+    public static MainUI mainUI;
 
     public GameObject destinationMarker;
     public float chatProximity;
 
     public Gradient rarityColors;
+    public Button loginBtn;
+    public Text loginResponse;
 
 
 

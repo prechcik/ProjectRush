@@ -1,0 +1,127 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd4a4d0341571494c8cedeed24194115, type: 3}
+  m_Name: InventoryDB
+  m_EditorClassIdentifier: 
+  itemList:
+  - id: 0
+    itemName: 
+    desc: 
+    damage: 0
+    itemIcon: {fileID: 0}
+    prefab: {fileID: 0}
+    rarity: 0
+  - id: 1
+    itemName: Simple Sword
+    desc: The simplest sword You can find.
+    damage: 1
+    itemIcon: {fileID: 21300000, guid: d1f8f314c98789043b379f407fdbe8eb, type: 3}
+    prefab: {fileID: 0}
+    rarity: 80
+  - id: 2
+    itemName: Simple Wand
+    desc: Legend says that this wand actually damaged someone.
+    damage: 1
+    itemIcon: {fileID: 21300000, guid: 3213c8565f694a2458ffb74df44cb0f4, type: 3}
+    prefab: {fileID: 0}
+    rarity: 80
+  - id: 3
+    itemName: Simple Crossbow
+    desc: If You can aim, this crossbow will prove You wrong.
+    damage: 1
+    itemIcon: {fileID: 21300000, guid: 48d1443d41667d940b72682fce3b869c, type: 3}
+    prefab: {fileID: 0}
+    rarity: 80
+  - id: 4
+    itemName: True Blade
+    desc: Don't hurt yourself with this baby
+    damage: 2
+    itemIcon: {fileID: 21300000, guid: d6bcba0977dcbac428d4aab556ae2c64, type: 3}
+    prefab: {fileID: 0}
+    rarity: 60
+  - id: 5
+    itemName: Double Trouble
+    desc: Twice as fun
+    damage: 3
+    itemIcon: {fileID: 21300000, guid: 900503fc39730cb4185d18e1e2c07123, type: 3}
+    prefab: {fileID: 0}
+    rarity: 20
+  - id: 6
+    itemName: Rapier
+    desc: Very pointy
+    damage: 2
+    itemIcon: {fileID: 21300000, guid: 08619b6cc33ab9b40b270116bcd182b7, type: 3}
+    prefab: {fileID: 0}
+    rarity: 35
+  - id: 7
+    itemName: Fiery Blade
+    desc: Hot! Hot! Hot!
+    damage: 4
+    itemIcon: {fileID: 21300000, guid: 3c4c700ad4890f14ab91502c9c9411b7, type: 3}
+    prefab: {fileID: 0}
+    rarity: 15
+  - id: 8
+    itemName: Gold Blade
+    desc: Killing couldn't be more fashionable than that!
+    damage: 10
+    itemIcon: {fileID: 21300000, guid: 24d92f47739c35f4a9ad19df727c99ed, type: 3}
+    prefab: {fileID: 0}
+    rarity: 1
+  - id: 9
+    itemName: Small axe
+    desc: Tiny death
+    damage: 1
+    itemIcon: {fileID: 21300000, guid: bdb0ab33bb7be854c85b796f34c8595b, type: 3}
+    prefab: {fileID: 0}
+    rarity: 80
+  - id: 10
+    itemName: Axe
+    desc: Regular axe..
+    damage: 2
+    itemIcon: {fileID: 21300000, guid: 12be6826498788840a112021d41ad349, type: 3}
+    prefab: {fileID: 0}
+    rarity: 60
+  - id: 11
+    itemName: Double axe
+    desc: Two sided fun!
+    damage: 3
+    itemIcon: {fileID: 21300000, guid: ea8b18a0394b8c74eb56575f8f596bea, type: 3}
+    prefab: {fileID: 0}
+    rarity: 45
+  - id: 12
+    itemName: '''Better'' Staff'
+    desc: Is it better?
+    damage: 2
+    itemIcon: {fileID: 21300000, guid: 5540401631bbe1f46b2a82004f9506b5, type: 3}
+    prefab: {fileID: 0}
+    rarity: 50
+  - id: 13
+    itemName: Normal staff
+    desc: Stick with some rope
+    damage: 3
+    itemIcon: {fileID: 21300000, guid: bab116182e9698b499d718cc5899cc11, type: 3}
+    prefab: {fileID: 0}
+    rarity: 35
+  - id: 14
+    itemName: Iron crossbow
+    desc: Sturdy shot!
+    damage: 2
+    itemIcon: {fileID: 21300000, guid: a50aa9bb56225c64f9ef67b50cf7dbd6, type: 3}
+    prefab: {fileID: 0}
+    rarity: 60
+  - id: 15
+    itemName: Fiery crossbow
+    desc: Hot and deadly!
+    damage: 3
+    itemIcon: {fileID: 21300000, guid: 50e48f964f1e1804a89c72acce170d46, type: 3}
+    prefab: {fileID: 0}
+    rarity: 25

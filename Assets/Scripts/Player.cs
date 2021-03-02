@@ -16,6 +16,8 @@ public class Player : NetworkBehaviour
     public GameObject modelContainer;
     public ParticleSystem levelUpParticle;
     public ParticleSystem levelUpParticle2;
+    public TextMesh usernameMesh;
+    public TextMesh levelMesh;
     public int activeOutfit = 0;
     public string userId;
     [SyncVar]
@@ -66,6 +68,25 @@ public class Player : NetworkBehaviour
     [SyncVar]
     public float playerSpeed = 2f;
 
+    private float dashCounter;
+
+    public DayTimeManager timeManager;
+    public Light flashLightObject;
+
+    [SyncVar]
+    public bool inCombat = false;
+    [SyncVar]
+    public float combatTimer = 0f;
+
+    public Transform HpBarParent;
+    public RectTransform HpBackground;
+    public Image HealthImage;
+    public Text HealthText;
+
+    [SyncVar]
+    public float currentHealth;
+    public float hpPercent;
+
 
 
     private void Awake()
@@ -87,6 +108,7 @@ public class Player : NetworkBehaviour
         gameDB = FindObjectOfType<GameDB>();
         agent = this.GetComponent<NavMeshAgent>();
         ui = FindObjectOfType<MainUI>();
+        timeManager = this.GetComponent<DayTimeManager>();
         if (isLocalPlayer)
         {
             Camera.main.GetComponent<CameraMovement>().target = this.transform;
@@ -98,6 +120,7 @@ public class Player : NetworkBehaviour
                 float newSpeed = this.playerSpeed * 3f;
                 SetBoostSpeed(newSpeed, 1f);
                 mainUI.dashButton.enabled = false;
+                dashCounter = 0f;
                 Invoke(nameof(ResetDash), 5f);
             });
         }
@@ -114,7 +137,25 @@ public class Player : NetworkBehaviour
         {
             gameDB = FindObjectOfType<GameDB>();
         }
-        if (this.GetComponentInChildren<TextMesh>().text != nickname) this.GetComponentInChildren<TextMesh>().text = nickname;
+        if (playerAnimator == null)
+        {
+            playerAnimator = this.GetComponentInChildren<Animator>();
+        }
+        if (usernameMesh.text != nickname) usernameMesh.text = nickname;
+        levelMesh.text = "Level " + currentLevel;
+        if (currentHealth > 0)
+        {
+            hpPercent = (float)(currentHealth / info.maxHealth);
+            if (playerAnimator != null) playerAnimator.SetBool("Alive", true);
+        } else
+        {
+            hpPercent = 0;
+            if (playerAnimator != null) playerAnimator.SetBool("Alive", false);
+        }
+        HpBackground.transform.position = Camera.main.WorldToScreenPoint(HpBarParent.transform.position);
+        HealthImage.fillAmount = hpPercent;
+        HealthText.text = currentHealth + "/" + info.maxHealth;
+
         if (activeOutfit != currentOutfit)
         {
             ChangeOutfit(currentOutfit);
@@ -157,6 +198,15 @@ public class Player : NetworkBehaviour
             {
                 destinationMarker.SetActive(false);
             }
+
+            if (!mainUI.dashButton.enabled)
+            {
+                mainUI.dashButton.image.fillAmount = dashCounter / 5f;
+                dashCounter += Time.deltaTime;
+            } else
+            {
+                mainUI.dashButton.image.fillAmount = 1f;
+            }
         }
         else if (!isLocalPlayer && isClient)
         {
@@ -185,6 +235,30 @@ public class Player : NetworkBehaviour
         {
             boostParticles.Stop();
         }
+        if (timeManager.TimeOfDay < 6f || timeManager.TimeOfDay > 18f)
+        {
+            flashLightObject.enabled = true;
+        } else
+        {
+            flashLightObject.enabled = false;
+        }
+        combatTimer -= Time.deltaTime;
+        if (combatTimer <= 0)
+        {
+            inCombat = false;
+        } else
+        {
+            inCombat = true;
+        }
+        if (inCombat)
+        {
+            HpBackground.gameObject.SetActive(true);
+        } else
+        {
+            HpBackground.gameObject.SetActive(false);
+        }
+
+
     }
 
     public void OnTriggerEnter(Collider collision)
@@ -223,8 +297,8 @@ public class Player : NetworkBehaviour
             {
                 GameObject playerModel = Instantiate(o.outfitPrefab, o.outfitPrefab.transform.localPosition, netIdentity.GetComponent<Player>().transform.rotation, netIdentity.GetComponent<Player>().modelContainer.transform);
                 playerModel.transform.localPosition = o.outfitPrefab.transform.localPosition;
-                netIdentity.GetComponent<Player>().activeOutfit = currentOutfit;
-                netIdentity.GetComponent<Player>().playerAnimator = playerModel.GetComponent<Animator>();
+                activeOutfit = currentOutfit;
+                playerAnimator = playerModel.GetComponent<Animator>();
             }
         }
     }
@@ -249,7 +323,7 @@ public class Player : NetworkBehaviour
         this.info.level = level;
         connectionToClient.identity.GetComponent<Player>().info = this.info;
         this.level = level;
-        Debug.LogFormat("Player [{0}] has leveled up to level {1}", this.nickname, this.level);
+        //Debug.LogFormat("[Server] Player [{0}] has leveled up to level {1}", this.nickname, this.level);
         gameDB.network.OnPlayerUpdateRequest(connectionToClient, new NetworkManagement.PlayerUpdateRequest { });
     }
 
@@ -257,7 +331,7 @@ public class Player : NetworkBehaviour
     public void ShowPackageScreen()
     {
         
-        gameDB.mainUI.RewardIcon.SetActive(false);
+        GameDB.mainUI.RewardIcon.SetActive(false);
     }
 
     [Command]
@@ -289,7 +363,7 @@ public class Player : NetworkBehaviour
 
     public void ShowRewardIcon()
     {
-        this.gameDB.mainUI.RewardIcon.SetActive(true);
+        GameDB.mainUI.RewardIcon.SetActive(true);
     }
 
     
@@ -297,7 +371,7 @@ public class Player : NetworkBehaviour
     [Command]
     public void HandleExperience()
     {
-        distanceTravelled += Vector3.Distance(lastPos, playerPosition);
+        distanceTravelled += (Vector3.Distance(lastPos, playerPosition) * gameDB.expRate );
         lastPos = playerPosition;
         if (distanceTravelled > 1f)
         {
@@ -333,7 +407,7 @@ public class Player : NetworkBehaviour
         currentPercent = percent;
         float lerpPercent = Mathf.Lerp(mainUI.expPanelImage.GetComponent<Image>().fillAmount, percent, Time.deltaTime * 5f);
         mainUI.expPanelImage.GetComponent<Image>().fillAmount = lerpPercent;
-        mainUI.expPanelText.GetComponent<Text>().text = "Level " + currentLevel + " (" + lerpPercent.ToString("0.00%") + ")";
+        mainUI.expPanelText.GetComponent<Text>().text = lerpPercent.ToString("0.00%");
     }
 
 
@@ -385,7 +459,29 @@ public class Player : NetworkBehaviour
         mainUI.dashButton.enabled = true;
     }
 
+    [Command]
+    public void ReceiveDamage(int damage)
+    {
+        //Debug.Log(nickname + " received " + damage + " damage");
+        if (!inCombat) inCombat = true; 
+        if (currentHealth >= damage)
+        {
+            currentHealth -= damage;
+        }
+        else
+        {
+            currentHealth = 0;
+            // DIE!
+        }
+        combatTimer = 5f;
+    }
 
+
+    [Command]
+    public void ToggleCombat(bool a)
+    {
+        inCombat = a;
+    }
 
 
 }

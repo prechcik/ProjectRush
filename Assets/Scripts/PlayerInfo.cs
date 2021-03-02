@@ -16,5 +16,10 @@ public struct PlayerInfo : NetworkMessage
     public string userId;
     public int experience;
     public int level;
+    public List<int> inventory;
+    public int currentHealth;
+    public int maxHealth;
+    public int heldItem;
+    public string inventoryString;
     
 }

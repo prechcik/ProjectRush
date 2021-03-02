@@ -34,10 +34,10 @@ public class RewardRoomOutfit : MonoBehaviour
                     Debug.Log("Clicked " + this.transform.name + ", adding outfit with id " + this.outfitId);
                     gameDB.network.AddPlayerOutfit(this.outfitId);
                     gameDB.SwitchToMainCamera();
-                    gameDB.mainUI.bottomPanel.SetActive(true);
-                    gameDB.mainUI.ChatBox.SetActive(true);
-                    gameDB.mainUI.dashButton.gameObject.SetActive(true);
-                    gameDB.mainUI.expPanelImage.transform.parent.gameObject.SetActive(true);
+                    GameDB.mainUI.bottomPanel.SetActive(true);
+                    GameDB.mainUI.ChatBox.SetActive(true);
+                    GameDB.mainUI.dashButton.gameObject.SetActive(true);
+                    GameDB.mainUI.expPanelImage.transform.parent.gameObject.SetActive(true);
                 }
             }
         }
